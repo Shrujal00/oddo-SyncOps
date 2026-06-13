@@ -1,34 +1,45 @@
 # 00 — Infrastructure
 
-Blocker for all other modules. Must be DONE first.
+**Status: DONE**
 
 ## Tasks
 
 ### AUTH-01 · JWT login + register
-**Status:** TODO  
+**Status:** DONE  
 **Files:** `backend/src/modules/auth/service.ts`, `repository.ts`, `validation.ts`  
-**What to implement:**
-- `register`: hash password (bcrypt), create User with role lookup, return JWT
-- `login`: lookup by email, compare hash, return JWT + user profile
-- JWT payload: `{ sub: userId, roleId, roleName, iat, exp }`
-- Use `ACCESS_TOKEN_SECRET` + `ACCESS_TOKEN_EXPIRY` from `src/config/env.ts`
+**Done:** scrypt hash + timingSafeEqual verify. JWT sign via `jsonwebtoken`. POST /auth/login + /auth/register both live.
 
 ### AUTH-02 · Auth middleware
-**Status:** DONE (scaffold exists)  
+**Status:** DONE  
 **Files:** `backend/src/common/middleware/auth.middleware.ts`  
-**Notes:** Verify JWT, attach decoded payload to `req.user`. Already scaffolded — check it works.
+**Done:** Verifies Bearer JWT, attaches `JwtPayload` ({ sub, roleId, roleName }) to `req.user`.
 
 ### AUTH-03 · RBAC guard
-**Status:** TODO  
-**Files:** `backend/src/common/guards/rbac.guard.ts`, `backend/src/common/constants/rbac.ts`  
-**What to implement:**
-- Guard reads `req.user.roleName`, checks against allowed roles for route
-- Use as Express middleware factory: `rbacGuard(["ADMIN", "SALES_USER"])`
+**Status:** DONE  
+**Files:** `backend/src/common/guards/rbac.guard.ts`  
+**Done:** `requireRoles(...roles)` factory — checks `req.user.roleName`, returns 403 if not in list.
 
 ### INFRA-01 · DB seed (roles + admin user)
-**Status:** TODO  
-**Files:** create `backend/prisma/seed.ts`  
-**What to implement:**
-- Seed all 6 roles: ADMIN, SALES_USER, PURCHASE_USER, MANUFACTURING_USER, INVENTORY_MANAGER, BUSINESS_OWNER
-- Seed one admin user (email from env or hardcoded default)
-- Add `"prisma": { "seed": "tsx prisma/seed.ts" }` to `backend/package.json`
+**Status:** DONE  
+**Files:** `backend/prisma/seed.ts`  
+**Done:** Seeds all 6 roles + `admin@syncops.dev / Admin@1234`. Idempotent upsert. `npm run prisma:seed`.
+
+### DESIGN-01 · Design system
+**Status:** DONE  
+**Files:** `docs/design.md`, `frontend/src/app/globals.css`, `frontend/tailwind.config.ts`  
+**Done:** Odoo light theme. Plum accent `#714B67`. White bg, light gray surface. CSS tokens + Tailwind semantic colors.
+
+### FE-INFRA-01 · App shell + sidebar
+**Status:** DONE  
+**Files:** `frontend/src/components/layouts/sidebar.tsx`, `frontend/src/app/(dashboard)/layout.tsx`, `frontend/src/app/(erp)/layout.tsx`  
+**Done:** Sidebar with role-filtered nav, user avatar, sign out. Shared layout for dashboard + ERP route groups.
+
+### FE-INFRA-02 · Auth store + API client + middleware
+**Status:** DONE  
+**Files:** `frontend/src/store/app-store.ts`, `frontend/src/services/api-client.ts`, `frontend/src/middleware.ts`  
+**Done:** Zustand persist store (accessToken + user). fetch wrapper with JWT injection. Next.js middleware redirects unauthenticated → /login.
+
+### FE-INFRA-03 · Login page
+**Status:** DONE  
+**Files:** `frontend/src/app/(auth)/login/page.tsx`  
+**Done:** Full login form. Sets JWT cookie on success. Redirects to /overview. Error + loading states.
