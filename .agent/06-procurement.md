@@ -10,7 +10,7 @@ This is the intelligence layer — triggered by Sales confirm, NOT a user-facing
 ## Tasks
 
 ### PROC-01 · Procurement engine (internal service)
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/procurement/service.ts`  
 **What to implement:**
 
@@ -35,7 +35,7 @@ Logic:
 7. Write AuditLog linking procurement action to sales order
 
 ### PROC-02 · Procurement list (HTTP)
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/procurement/controller.ts`, `routes.ts`  
 **What to implement:**
 - `GET /api/procurement` — list auto-created procurement actions (read from PO/MO with source=auto)

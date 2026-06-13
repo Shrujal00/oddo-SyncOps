@@ -1,6 +1,6 @@
 # Phase 06 — Procurement Automation
 
-**Status:** TODO  
+**Status:** DONE
 **Owner:** Teesha-Gokulgandhi  
 **Depends on:** Phase 04 (Sales confirm) + Phase 05 (MO create)  
 
@@ -70,9 +70,9 @@ If not configured and `procureOnDemand = true`, throw a descriptive error on con
 - Shows: source sales order, product, shortfall qty, action taken (PO or MO created), status
 
 ## Done Criteria
-- [ ] Product with `procureOnDemand=true`, `supplyStrategy=BUY`, `preferredVendorId` set
-- [ ] Create SO with qty > freeToUseQty → confirm → PO auto-created in DRAFT
-- [ ] Product with `supplyStrategy=MAKE`, `activeBomId` set → confirm shortfall → MO auto-created
-- [ ] Product with `procureOnDemand=false` → confirm → no auto-procurement
-- [ ] Missing vendor/BoM config returns 422 with clear message
-- [ ] Procurement page shows triggered actions
+- [x] Product with `procureOnDemand=true`, `supplyStrategy=BUY`, `preferredVendorId` set
+- [x] Create SO with qty > freeToUseQty → confirm → PO auto-created in DRAFT
+- [x] Product with `supplyStrategy=MAKE`, `activeBomId` set → confirm shortfall → MO auto-created
+- [x] Product with `procureOnDemand=false` → confirm → no auto-procurement
+- [x] Missing vendor/BoM config returns 422 with clear message
+- [x] Procurement page shows triggered actions

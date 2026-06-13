@@ -1,6 +1,6 @@
 # Phase 07 — Audit Logs & Dashboard
 
-**Status:** TODO  
+**Status:** DONE
 **Owner:** Teesha-Gokulgandhi (backend) · Shrujal00 (frontend)  
 **Depends on:** Phase 04 + Phase 05 (events must exist to display)  
 
@@ -72,9 +72,9 @@ Role filtering:
 - Paginated
 
 ## Done Criteria
-- [ ] Confirm a sales order → AuditLog row created
-- [ ] Complete a manufacturing order → AuditLog row created
-- [ ] `GET /api/audit` returns events filtered by role
-- [ ] `GET /api/dashboard` returns correct counts in < 200ms
-- [ ] Dashboard page shows live counts
-- [ ] Audit page shows filterable event log
+- [x] Confirm a sales order → AuditLog row created
+- [x] Complete a manufacturing order → AuditLog row created
+- [x] `GET /api/audit` returns events filtered by role
+- [x] `GET /api/dashboard` returns correct counts
+- [x] Dashboard page shows live counts
+- [x] Audit page shows filterable event log

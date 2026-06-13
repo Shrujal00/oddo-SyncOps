@@ -8,7 +8,7 @@
 ## Tasks
 
 ### MFG-01 · WorkCenter CRUD
-**Status:** TODO  
+**Status:** DONE
 **Files:** create `backend/src/modules/manufacturing/` (add workcenter routes) or separate module  
 **What to implement:**
 - `GET /api/manufacturing/work-centers` — list
@@ -17,7 +17,7 @@
 - WorkCenter model added to schema (DONE)
 
 ### MFG-02 · Bill of Materials CRUD
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/bill-of-materials/service.ts`, `repository.ts`, `validation.ts`  
 **What to implement:**
 - Create BoM with items (componentProductId + quantity + optional scrapPercentage)
@@ -29,7 +29,7 @@
 - `DELETE /api/bom/:id` — soft delete
 
 ### MFG-03 · Create Manufacturing Order
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/manufacturing/service.ts`, `repository.ts`  
 **What to implement:**
 1. Lookup active BoM for product (via `activeBomId` on Product or latest active BoM)
@@ -38,7 +38,7 @@
 4. orderNumber: `MO-YYYYMMDD-XXXX`
 
 ### MFG-04 · Confirm Manufacturing Order
-**Status:** TODO  
+**Status:** DONE
 **What to implement:**
 1. DRAFT → CONFIRMED
 2. For each BoM component: check freeToUseQty — warn if insufficient (don't block, just flag)
@@ -46,7 +46,7 @@
 4. Write AuditLog
 
 ### MFG-05 · Start + Complete Manufacturing Order
-**Status:** TODO  
+**Status:** DONE
 **What to implement:**
 - `start`: CONFIRMED → IN_PROGRESS, update work order statuses to RELEASED
 - `complete`:
@@ -57,7 +57,7 @@
   5. Write AuditLog: MANUFACTURING_COMPLETED + INVENTORY_CHANGED
 
 ### MFG-06 · Work Order status updates
-**Status:** TODO  
+**Status:** DONE
 **What to implement:**
 - `PATCH /api/manufacturing/:moId/work-orders/:woId` — update status (PLANNED → RELEASED → IN_PROGRESS → COMPLETED)
 - Manufacturing User only

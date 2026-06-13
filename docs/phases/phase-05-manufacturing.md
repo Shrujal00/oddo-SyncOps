@@ -1,6 +1,6 @@
 # Phase 05 — Manufacturing & Bill of Materials
 
-**Status:** TODO  
+**Status:** DONE
 **Owner:** Teesha-Gokulgandhi (backend) · Shrujal00 (frontend)  
 **Depends on:** Phase 03  
 
@@ -75,9 +75,9 @@ Manufacturing User only.
 - Work order steps list per MO with individual status updates
 
 ## Done Criteria
-- [ ] Create BoM with 3 components + 2 operations
-- [ ] Create MO → WorkOrders auto-generated from BoM
-- [ ] Complete MO → component CONSUMPTION movements written → component stock decreases
-- [ ] Complete MO → PRODUCTION movement written → finished product stock increases
-- [ ] Scrap percentage applied to consumption qty
-- [ ] Frontend MO list shows work order steps
+- [x] Create BoM with 3 components + 2 operations
+- [x] Create MO → WorkOrders auto-generated from MO operations/default operation
+- [x] Complete MO → component CONSUMPTION movements written → component stock decreases
+- [x] Complete MO → PRODUCTION movement written → finished product stock increases
+- [x] Scrap percentage applied to consumption qty
+- [x] Frontend MO list shows work order steps

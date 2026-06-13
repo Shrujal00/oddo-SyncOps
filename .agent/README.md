@@ -19,9 +19,9 @@ AI agents and humans: **read this before touching any code.**
 | [02-inventory.md](./02-inventory.md) | InventoryMovement ledger | TODO |
 | [03-sales.md](./03-sales.md) | Sales orders, confirm, deliver | **DONE** |
 | [04-purchases.md](./04-purchases.md) | Purchase orders, receive | **DONE** |
-| [05-manufacturing.md](./05-manufacturing.md) | MO, Work Orders, BoM, WorkCenter | TODO |
-| [06-procurement.md](./06-procurement.md) | MTS/MTO automation trigger | TODO |
-| [07-audit.md](./07-audit.md) | Audit log writes + query | TODO |
+| [05-manufacturing.md](./05-manufacturing.md) | MO, Work Orders, BoM, WorkCenter | **DONE** |
+| [06-procurement.md](./06-procurement.md) | MTS/MTO automation trigger | **DONE** |
+| [07-audit.md](./07-audit.md) | Audit log writes + query | **DONE** |
 | [08-dashboard.md](./08-dashboard.md) | Aggregated stats queries | TODO |
 | [09-frontend.md](./09-frontend.md) | Frontend pages + API wiring | TODO |
 

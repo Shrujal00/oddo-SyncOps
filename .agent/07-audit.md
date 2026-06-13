@@ -3,7 +3,7 @@
 ## Tasks
 
 ### AUDIT-01 · Audit write helper
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/audit/repository.ts`  
 **What to implement:**
 ```ts
@@ -19,7 +19,7 @@ async logEvent(data: {
 Called internally by every service on status changes. Never exposed as HTTP write endpoint.
 
 ### AUDIT-02 · Audit log list (HTTP)
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/audit/service.ts`, `controller.ts`  
 **What to implement:**
 - `GET /api/audit?entityType=&entityId=&eventType=&from=&to=&userId=` — paginated
