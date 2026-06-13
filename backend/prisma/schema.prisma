@@ -1,0 +1,370 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleName {
+  ADMIN
+  SALES_USER
+  PURCHASE_USER
+  MANUFACTURING_USER
+  INVENTORY_MANAGER
+  BUSINESS_OWNER
+}
+
+enum SalesOrderStatus {
+  DRAFT
+  CONFIRMED
+  PARTIALLY_DELIVERED
+  DELIVERED
+  CANCELLED
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  CONFIRMED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum ManufacturingStatus {
+  DRAFT
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum WorkOrderStatus {
+  PLANNED
+  RELEASED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ProcurementMode {
+  MTS
+  MTO
+}
+
+enum ProcurementSupplyStrategy {
+  BUY
+  MAKE
+}
+
+enum InventoryMovementType {
+  SALE
+  PURCHASE
+  CONSUMPTION
+  PRODUCTION
+  ADJUSTMENT
+}
+
+enum AuditEventType {
+  USER_LOGIN
+  PRODUCT_UPDATED
+  SALES_ORDER_CHANGED
+  PURCHASE_ORDER_CHANGED
+  MANUFACTURING_COMPLETED
+  INVENTORY_CHANGED
+}
+
+model Role {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        RoleName  @unique
+  description String?
+  users       User[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([deletedAt])
+}
+
+model User {
+  id           String     @id @default(uuid()) @db.Uuid
+  roleId       String     @db.Uuid
+  role         Role       @relation(fields: [roleId], references: [id])
+  email        String     @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  isActive     Boolean    @default(true)
+  auditLogs    AuditLog[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+
+  @@index([roleId])
+  @@index([email])
+  @@index([deletedAt])
+}
+
+model Customer {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String
+  email       String?
+  phone       String?
+  salesOrders SalesOrder[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@index([name])
+  @@index([deletedAt])
+}
+
+model Vendor {
+  id               String          @id @default(uuid()) @db.Uuid
+  name             String
+  email            String?
+  phone            String?
+  purchaseOrders   PurchaseOrder[]
+  preferredByProducts Product[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  deletedAt        DateTime?
+
+  @@index([name])
+  @@index([deletedAt])
+}
+
+model Product {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  sku                     String                   @unique
+  name                    String
+  description             String?
+  unitOfMeasure           String
+  standardCost            Decimal                  @db.Decimal(14, 2)
+  sellingPrice            Decimal                  @db.Decimal(14, 2)
+  reorderPoint            Int                      @default(0)
+  procureOnDemand         Boolean                  @default(false)
+  procurementMode         ProcurementMode          @default(MTS)
+  supplyStrategy          ProcurementSupplyStrategy @default(BUY)
+  preferredVendorId       String?                  @db.Uuid
+  preferredVendor         Vendor?                  @relation(fields: [preferredVendorId], references: [id])
+  activeBomId             String?                  @db.Uuid
+  salesOrderItems         SalesOrderItem[]
+  purchaseOrderItems      PurchaseOrderItem[]
+  inventoryMovements      InventoryMovement[]
+  billOfMaterialsProduced BillOfMaterial[]
+  billOfMaterialItems     BillOfMaterialItem[]
+  manufacturingOrders     ManufacturingOrder[]
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
+
+  @@index([sku])
+  @@index([name])
+  @@index([preferredVendorId])
+  @@index([deletedAt])
+}
+
+model SalesOrder {
+  id           String           @id @default(uuid()) @db.Uuid
+  orderNumber  String           @unique
+  customerId   String           @db.Uuid
+  customer     Customer         @relation(fields: [customerId], references: [id])
+  status       SalesOrderStatus @default(DRAFT)
+  orderDate    DateTime
+  requestedDate DateTime?
+  notes        String?
+  items        SalesOrderItem[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  deletedAt    DateTime?
+
+  @@index([customerId])
+  @@index([status])
+  @@index([orderDate])
+  @@index([deletedAt])
+}
+
+model SalesOrderItem {
+  id            String     @id @default(uuid()) @db.Uuid
+  salesOrderId  String     @db.Uuid
+  salesOrder    SalesOrder @relation(fields: [salesOrderId], references: [id])
+  productId     String     @db.Uuid
+  product       Product    @relation(fields: [productId], references: [id])
+  quantity      Int
+  deliveredQty  Int        @default(0)
+  unitPrice     Decimal    @db.Decimal(14, 2)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+
+  @@index([salesOrderId])
+  @@index([productId])
+  @@index([deletedAt])
+}
+
+model PurchaseOrder {
+  id            String              @id @default(uuid()) @db.Uuid
+  orderNumber   String              @unique
+  vendorId      String              @db.Uuid
+  vendor        Vendor              @relation(fields: [vendorId], references: [id])
+  status        PurchaseOrderStatus @default(DRAFT)
+  orderDate     DateTime
+  expectedDate  DateTime?
+  notes         String?
+  items         PurchaseOrderItem[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  deletedAt     DateTime?
+
+  @@index([vendorId])
+  @@index([status])
+  @@index([orderDate])
+  @@index([deletedAt])
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(uuid()) @db.Uuid
+  purchaseOrderId String        @db.Uuid
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  productId       String        @db.Uuid
+  product         Product       @relation(fields: [productId], references: [id])
+  quantity        Int
+  receivedQty     Int           @default(0)
+  unitCost        Decimal       @db.Decimal(14, 2)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  @@index([purchaseOrderId])
+  @@index([productId])
+  @@index([deletedAt])
+}
+
+model InventoryMovement {
+  id               String                @id @default(uuid()) @db.Uuid
+  productId        String                @db.Uuid
+  product          Product               @relation(fields: [productId], references: [id])
+  movementType     InventoryMovementType
+  quantity         Int
+  referenceType    String?
+  referenceId      String?               @db.Uuid
+  notes            String?
+  occurredAt       DateTime
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  deletedAt        DateTime?
+
+  @@index([productId])
+  @@index([movementType])
+  @@index([referenceType, referenceId])
+  @@index([occurredAt])
+  @@index([deletedAt])
+}
+
+model BillOfMaterial {
+  id              String               @id @default(uuid()) @db.Uuid
+  productId       String               @db.Uuid
+  product         Product              @relation(fields: [productId], references: [id])
+  name            String
+  version         String
+  isActive        Boolean              @default(true)
+  items           BillOfMaterialItem[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  deletedAt       DateTime?
+
+  @@unique([productId, version])
+  @@index([productId])
+  @@index([isActive])
+  @@index([deletedAt])
+}
+
+model BillOfMaterialItem {
+  id               String         @id @default(uuid()) @db.Uuid
+  billOfMaterialId String         @db.Uuid
+  billOfMaterial   BillOfMaterial @relation(fields: [billOfMaterialId], references: [id])
+  productId        String         @db.Uuid
+  product          Product        @relation(fields: [productId], references: [id])
+  quantity         Int
+  scrapPercentage  Decimal?       @db.Decimal(5, 2)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  deletedAt        DateTime?
+
+  @@index([billOfMaterialId])
+  @@index([productId])
+  @@index([deletedAt])
+}
+
+model ManufacturingOrder {
+  id                String              @id @default(uuid()) @db.Uuid
+  orderNumber       String              @unique
+  productId         String              @db.Uuid
+  product           Product             @relation(fields: [productId], references: [id])
+  quantity          Int
+  status            ManufacturingStatus @default(DRAFT)
+  plannedStartDate  DateTime?
+  plannedFinishDate DateTime?
+  workOrders        WorkOrder[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+
+  @@index([productId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model WorkCenter {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String      @unique
+  description String?
+  workOrders  WorkOrder[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+
+  @@index([deletedAt])
+}
+
+model WorkOrder {
+  id                   String             @id @default(uuid()) @db.Uuid
+  manufacturingOrderId String             @db.Uuid
+  manufacturingOrder   ManufacturingOrder @relation(fields: [manufacturingOrderId], references: [id])
+  workCenterId         String?            @db.Uuid
+  workCenter           WorkCenter?        @relation(fields: [workCenterId], references: [id])
+  operationName        String
+  plannedDurationMins  Int?
+  status               WorkOrderStatus    @default(PLANNED)
+  sequence             Int
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  deletedAt            DateTime?
+
+  @@index([manufacturingOrderId])
+  @@index([workCenterId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model AuditLog {
+  id          String         @id @default(uuid()) @db.Uuid
+  userId      String?        @db.Uuid
+  user        User?          @relation(fields: [userId], references: [id])
+  eventType   AuditEventType
+  entityType  String
+  entityId    String?        @db.Uuid
+  summary     String
+  metadata    Json?
+  occurredAt  DateTime
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([entityType, entityId])
+  @@index([occurredAt])
+  @@index([deletedAt])
+}
