@@ -17,6 +17,7 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
+import { BrandLogo } from "../brand/logo";
 import { useAppStore } from "../../store/app-store";
 
 const NAV = [
@@ -50,11 +51,8 @@ export function Sidebar() {
 
   return (
     <aside className="w-[220px] shrink-0 flex flex-col h-screen bg-elevated border-r border-border sticky top-0">
-      <div className="flex items-center gap-2.5 px-4 py-4 border-b border-border">
-        <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center shrink-0">
-          <Boxes size={16} className="text-white" />
-        </div>
-        <span className="text-sm font-semibold text-text-1">SyncOps</span>
+      <div className="flex items-center px-4 py-4 border-b border-border">
+        <BrandLogo className="h-9 w-[150px]" />
       </div>
 
       <nav className="flex-1 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">

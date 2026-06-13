@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { BrandLogo } from "../../../components/brand/logo";
 import { authApi } from "../../../features/auth";
 import { useAppStore } from "../../../store/app-store";
 
@@ -34,12 +35,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-surface">
       <div className="w-[400px] bg-elevated rounded-2xl border border-border p-8 shadow-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center mb-3">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 10L10 3L17 10M5 8V17H15V8" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <h1 className="text-xl font-semibold text-text-1">SyncOps</h1>
+          <BrandLogo className="h-16 w-[240px]" />
           <p className="text-sm text-text-2 mt-0.5">From Demand to Delivery</p>
         </div>
 

@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { requireRoles } from "../../common/guards/rbac.guard.js";
+import { authenticateRequest } from "../../common/middleware/auth.middleware.js";
 import { validateBody } from "../../common/validators/request-validator.js";
 import { asyncHandler } from "../../utils/async-handler.js";
 import { ManufacturingController } from "./controller.js";
@@ -15,6 +17,9 @@ import {
 const controller = new ManufacturingController();
 
 export const manufacturingRoutes = Router();
+
+manufacturingRoutes.use(authenticateRequest);
+manufacturingRoutes.use(requireRoles("ADMIN", "MANUFACTURING_USER", "BUSINESS_OWNER"));
 
 manufacturingRoutes.get("/work-centers", asyncHandler(controller.listWorkCenters));
 manufacturingRoutes.post("/work-centers", validateBody(createWorkCenterSchema), asyncHandler(controller.createWorkCenter));

@@ -11,7 +11,11 @@
     "dev": "npm run dev --workspace frontend",
     "dev:frontend": "npm run dev --workspace frontend",
     "dev:backend": "npm run dev --workspace backend",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
     "lint": "npm run lint --workspaces",
+    "db:reset": "powershell -ExecutionPolicy Bypass -File scripts/reset-db.ps1 -Force",
+    "db:reset:check": "powershell -ExecutionPolicy Bypass -File scripts/reset-db.ps1",
     "format": "prettier --write .",
     "prepare": "husky"
   },

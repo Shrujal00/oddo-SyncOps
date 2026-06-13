@@ -16,6 +16,11 @@ enum RoleName {
   BUSINESS_OWNER
 }
 
+enum ProductType {
+  RAW_MATERIAL
+  FINISHED_PRODUCT
+}
+
 enum SalesOrderStatus {
   DRAFT
   CONFIRMED
@@ -140,6 +145,7 @@ model Product {
   sku                     String                   @unique
   name                    String
   description             String?
+  productType             ProductType              @default(FINISHED_PRODUCT)
   unitOfMeasure           String
   standardCost            Decimal                  @db.Decimal(14, 2)
   sellingPrice            Decimal                  @db.Decimal(14, 2)
@@ -162,6 +168,7 @@ model Product {
 
   @@index([sku])
   @@index([name])
+  @@index([productType])
   @@index([preferredVendorId])
   @@index([deletedAt])
 }
@@ -368,4 +375,20 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([occurredAt])
   @@index([deletedAt])
+}
+
+model AssistantDocumentChunk {
+  id          String   @id @default(uuid()) @db.Uuid
+  sourcePath  String
+  chunkIndex  Int
+  title       String?
+  content     String
+  contentHash String
+  embedding   Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([sourcePath, chunkIndex])
+  @@index([sourcePath])
+  @@index([contentHash])
 }

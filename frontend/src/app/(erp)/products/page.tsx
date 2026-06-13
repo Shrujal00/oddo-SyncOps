@@ -9,6 +9,7 @@ interface Product {
   sku: string;
   name: string;
   description?: string;
+  productType: ProductType;
   unitOfMeasure: string;
   standardCost: number;
   sellingPrice: number;
@@ -23,6 +24,8 @@ interface Product {
   freeToUseQty: number;
 }
 
+type ProductType = "RAW_MATERIAL" | "FINISHED_PRODUCT";
+
 interface ProductsResponse {
   data: { products: Product[]; total: number };
 }
@@ -31,6 +34,7 @@ const EMPTY_FORM = {
   sku: "",
   name: "",
   description: "",
+  productType: "FINISHED_PRODUCT" as ProductType,
   unitOfMeasure: "pcs",
   standardCost: 0,
   sellingPrice: 0,
@@ -42,6 +46,40 @@ const EMPTY_FORM = {
   activeBomId: "",
 };
 
+const UNIT_OPTIONS = [
+  { value: "pcs", label: "Pieces (pcs)" },
+  { value: "each", label: "Each" },
+  { value: "box", label: "Box" },
+  { value: "pack", label: "Pack" },
+  { value: "set", label: "Set" },
+  { value: "pair", label: "Pair" },
+  { value: "dozen", label: "Dozen" },
+  { value: "kg", label: "Kilogram (kg)" },
+  { value: "g", label: "Gram (g)" },
+  { value: "mg", label: "Milligram (mg)" },
+  { value: "tonne", label: "Tonne" },
+  { value: "l", label: "Liter (L)" },
+  { value: "ml", label: "Milliliter (mL)" },
+  { value: "m", label: "Meter (m)" },
+  { value: "cm", label: "Centimeter (cm)" },
+  { value: "mm", label: "Millimeter (mm)" },
+  { value: "sq_m", label: "Square meter (sq m)" },
+  { value: "cu_m", label: "Cubic meter (cu m)" },
+  { value: "roll", label: "Roll" },
+];
+
+const PRODUCT_TYPE_OPTIONS = [
+  { value: "FINISHED_PRODUCT", label: "Finished Product" },
+  { value: "RAW_MATERIAL", label: "Raw Material" },
+];
+
+function unitOptionsFor(value: string) {
+  if (!value || UNIT_OPTIONS.some((option) => option.value === value)) {
+    return UNIT_OPTIONS;
+  }
+  return [{ value, label: value }, ...UNIT_OPTIONS];
+}
+
 export default function ProductsPage() {
   const { accessToken, user } = useAppStore();
   const qc = useQueryClient();
@@ -49,6 +87,7 @@ export default function ProductsPage() {
 
   const [search, setSearch] = useState("");
   const [lowStockOnly, setLowStockOnly] = useState(false);
+  const [productTypeFilter, setProductTypeFilter] = useState<"ALL" | ProductType>("ALL");
   const [modal, setModal] = useState<null | "create" | Product>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
@@ -56,9 +95,10 @@ export default function ProductsPage() {
   const params = new URLSearchParams();
   if (search) params.set("name", search);
   if (lowStockOnly) params.set("lowStockOnly", "true");
+  if (productTypeFilter !== "ALL") params.set("productType", productTypeFilter);
 
   const { data, isLoading } = useQuery<ProductsResponse["data"]>({
-    queryKey: ["products", search, lowStockOnly],
+    queryKey: ["products", search, lowStockOnly, productTypeFilter],
     queryFn: async () => {
       const res = await apiFetch<ProductsResponse>(`/products?${params}`, { token: accessToken ?? undefined });
       return res.data;
@@ -106,6 +146,7 @@ export default function ProductsPage() {
       sku: p.sku,
       name: p.name,
       description: p.description ?? "",
+      productType: p.productType,
       unitOfMeasure: p.unitOfMeasure,
       standardCost: p.standardCost,
       sellingPrice: p.sellingPrice,
@@ -171,6 +212,15 @@ export default function ProductsPage() {
           />
           Low stock only
         </label>
+        <select
+          value={productTypeFilter}
+          onChange={(e) => setProductTypeFilter(e.target.value as "ALL" | ProductType)}
+          className="px-3 py-1.5 rounded-lg border border-border bg-bg text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-accent"
+        >
+          <option value="ALL">All types</option>
+          <option value="FINISHED_PRODUCT">Finished products</option>
+          <option value="RAW_MATERIAL">Raw materials</option>
+        </select>
       </div>
 
       {/* Table */}
@@ -184,7 +234,7 @@ export default function ProductsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-surface border-b border-border">
-                  {["SKU", "Name", "Unit", "On Hand", "Reserved", "Free to Use", "Reorder Pt", ""].map((h) => (
+                  {["SKU", "Name", "Type", "Unit", "On Hand", "Reserved", "Free to Use", "Reorder Pt", ""].map((h) => (
                     <th key={h} className="text-left px-4 py-2.5 text-xs font-medium text-text-3 whitespace-nowrap">
                       {h}
                     </th>
@@ -209,6 +259,15 @@ export default function ProductsPage() {
                             LOW
                           </span>
                         )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                          p.productType === "RAW_MATERIAL"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}>
+                          {p.productType === "RAW_MATERIAL" ? "RAW" : "PRODUCT"}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-text-2">{p.unitOfMeasure}</td>
                       <td className="px-4 py-3 text-text-1 font-medium">{p.onHandQty}</td>
@@ -255,7 +314,18 @@ export default function ProductsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <Field label="SKU *" value={form.sku} onChange={(v) => setForm((f) => ({ ...f, sku: v }))} />
                 <Field label="Name *" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
-                <Field label="Unit of Measure *" value={form.unitOfMeasure} onChange={(v) => setForm((f) => ({ ...f, unitOfMeasure: v }))} />
+                <SelectField
+                  label="Product Type *"
+                  value={form.productType}
+                  options={PRODUCT_TYPE_OPTIONS}
+                  onChange={(v) => setForm((f) => ({ ...f, productType: v as ProductType }))}
+                />
+                <SelectField
+                  label="Unit of Measure *"
+                  value={form.unitOfMeasure}
+                  options={unitOptionsFor(form.unitOfMeasure)}
+                  onChange={(v) => setForm((f) => ({ ...f, unitOfMeasure: v }))}
+                />
                 <Field label="Reorder Point" type="number" value={String(form.reorderPoint)} onChange={(v) => setForm((f) => ({ ...f, reorderPoint: Number(v) }))} />
                 <Field label="Standard Cost" type="number" value={String(form.standardCost)} onChange={(v) => setForm((f) => ({ ...f, standardCost: Number(v) }))} />
                 <Field label="Selling Price" type="number" value={String(form.sellingPrice)} onChange={(v) => setForm((f) => ({ ...f, sellingPrice: Number(v) }))} />

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authRoutes } from "../modules/auth/index.js";
+import { assistantRoutes } from "../modules/assistant/index.js";
 import { auditRoutes } from "../modules/audit/index.js";
 import { billOfMaterialsRoutes } from "../modules/bill-of-materials/index.js";
 import { customersRoutes } from "../modules/customers/index.js";
@@ -21,6 +22,7 @@ apiRouter.get("/", (_request, response) => {
     status: "ok",
     routes: [
       "/api/auth",
+      "/api/assistant",
       "/api/products",
       "/api/sales",
       "/api/purchases",
@@ -35,6 +37,7 @@ apiRouter.get("/", (_request, response) => {
 });
 
 apiRouter.use("/auth", authRoutes);
+apiRouter.use("/assistant", assistantRoutes);
 apiRouter.use("/audit", auditRoutes);
 apiRouter.use("/audit-logs", auditRoutes);
 apiRouter.use("/bill-of-materials", billOfMaterialsRoutes);

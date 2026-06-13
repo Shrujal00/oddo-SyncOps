@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "../components/brand/logo";
 import {
   ClipboardCheck,
   Factory,
@@ -10,7 +11,6 @@ import {
   ScrollText,
   ShieldCheck,
   ShoppingCart,
-  Sparkles,
   Warehouse,
 } from "lucide-react";
 
@@ -65,10 +65,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-20 border-b border-border bg-bg/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-white">
-              <Sparkles size={18} />
-            </div>
-            <span className="text-xl font-semibold tracking-tight">SyncOps</span>
+            <BrandLogo className="h-10 w-[170px]" />
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-medium text-text-2 md:flex">

@@ -6,7 +6,6 @@ syncops/
   .gitignore
   .husky/pre-commit
   .prettierrc
-  docker-compose.yml
   eslint.config.mjs
   package.json
   README.md

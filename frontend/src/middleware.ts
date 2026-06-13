@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/forgot-password"];
+const PUBLIC_FILE = /\.(?:png|jpg|jpeg|gif|webp|svg|ico|txt|xml|json)$/i;
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  if (PUBLIC_FILE.test(pathname)) {
+    return NextResponse.next();
+  }
+
   const isLandingPage = pathname === "/";
   const isAuthPage = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   const isPublic = isLandingPage || isAuthPage;

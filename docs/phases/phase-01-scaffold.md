@@ -19,7 +19,7 @@
 - [x] Feature modules, API client, Zustand store, TanStack Query client
 - [x] Docs: architecture, RBAC, workflow, DB schema, API spec
 - [x] `.agent/` progress tracker with task specs for all modules
-- [x] Docker Compose + `.env.example`
+- [x] Local `.env.example`
 - [x] 34 logical commits pushed to GitHub
 
 ## Key Decisions

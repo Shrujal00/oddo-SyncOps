@@ -1,3 +1,4 @@
+import { AssistantWidget } from "../../components/assistant/assistant-widget";
 import { Sidebar } from "../../components/layouts/sidebar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -7,6 +8,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="flex-1 min-w-0 flex flex-col">
         {children}
       </main>
+      <AssistantWidget />
     </div>
   );
 }

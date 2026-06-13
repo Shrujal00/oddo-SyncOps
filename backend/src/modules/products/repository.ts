@@ -5,16 +5,18 @@ import type { CreateProductDto, UpdateProductDto } from "./dto.js";
 export interface ListProductsFilters {
   sku?: string;
   name?: string;
+  productType?: "RAW_MATERIAL" | "FINISHED_PRODUCT";
 }
 
 export class ProductsRepository {
   async listProducts(filters: ListProductsFilters = {}) {
-    const { sku, name } = filters;
+    const { sku, name, productType } = filters;
     return prisma.product.findMany({
       where: {
         deletedAt: null,
         ...(sku && { sku: { contains: sku, mode: "insensitive" as const } }),
         ...(name && { name: { contains: name, mode: "insensitive" as const } }),
+        ...(productType && { productType }),
       },
       orderBy: { name: "asc" },
     });
@@ -46,6 +48,7 @@ export class ProductsRepository {
         sku: dto.sku,
         name: dto.name,
         description: dto.description,
+        productType: dto.productType ?? "FINISHED_PRODUCT",
         unitOfMeasure: dto.unitOfMeasure,
         standardCost: dto.standardCost,
         sellingPrice: dto.sellingPrice,
@@ -79,6 +82,7 @@ export class ProductsRepository {
         ...(dto.sku !== undefined && { sku: dto.sku }),
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.productType !== undefined && { productType: dto.productType }),
         ...(dto.unitOfMeasure !== undefined && { unitOfMeasure: dto.unitOfMeasure }),
         ...(dto.standardCost !== undefined && { standardCost: dto.standardCost }),
         ...(dto.sellingPrice !== undefined && { sellingPrice: dto.sellingPrice }),

@@ -18,6 +18,7 @@ async function attachStock(
     sku: product.sku,
     name: product.name,
     description: product.description ?? undefined,
+    productType: product.productType as "RAW_MATERIAL" | "FINISHED_PRODUCT",
     unitOfMeasure: product.unitOfMeasure,
     standardCost: toNum(product.standardCost),
     sellingPrice: toNum(product.sellingPrice),
