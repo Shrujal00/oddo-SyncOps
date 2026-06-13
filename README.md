@@ -13,23 +13,31 @@ syncops/
   docs/      Architecture, schema, API, RBAC, and workflow notes
 ```
 
-## Commands
+## Setup
+
+**Prerequisites:** Node >=20, PostgreSQL running locally.
 
 ```bash
+# Install dependencies
 npm install
-npm run dev:frontend
-npm run dev:backend
-docker compose up -d
+
+# Backend — copy env, run migrations, seed DB
+cd backend
+cp ../.env.example .env   # fill in DATABASE_URL and JWT_SECRET
+npx prisma migrate dev
+npm run prisma:seed       # seeds 6 roles + admin@syncops.dev / Admin@1234
+
+# Run
+npm run dev:backend       # http://localhost:4000
+npm run dev:frontend      # http://localhost:3000
 ```
 
-## Scaffold Principles
+## Architecture
 
-- Feature-first architecture.
-- Controllers receive requests, call services, and return responses.
-- Services own business rules.
-- Repositories own database interaction.
-- DTOs, validators, and route contracts are explicit.
-- This scaffold intentionally contains no business logic or CRUD implementation.
+- Feature-first modules: controller → service → repository → Prisma.
+- Services own all business rules.
+- Repositories own all DB interaction.
+- DTOs and Zod validators at every HTTP boundary.
 
 ## ERP Modules
 
