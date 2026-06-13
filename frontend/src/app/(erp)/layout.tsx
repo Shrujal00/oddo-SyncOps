@@ -1,0 +1,12 @@
+import { Sidebar } from "../../components/layouts/sidebar";
+
+export default function ErpLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen bg-bg">
+      <Sidebar />
+      <main className="flex-1 min-w-0 flex flex-col">
+        {children}
+      </main>
+    </div>
+  );
+}
