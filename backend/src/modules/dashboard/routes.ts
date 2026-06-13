@@ -6,4 +6,5 @@ const controller = new DashboardController();
 
 export const dashboardRoutes = Router();
 
+dashboardRoutes.get("/", asyncHandler(controller.summary));
 dashboardRoutes.get("/summary", asyncHandler(controller.summary));

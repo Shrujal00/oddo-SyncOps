@@ -8,5 +8,6 @@ const controller = new ProcurementController();
 
 export const procurementRoutes = Router();
 
+procurementRoutes.get("/", asyncHandler(controller.listActions));
 procurementRoutes.get("/rules", asyncHandler(controller.listRules));
 procurementRoutes.post("/plan", validateBody(procurementDemandSchema), asyncHandler(controller.plan));

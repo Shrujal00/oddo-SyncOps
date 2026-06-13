@@ -15,7 +15,7 @@ export class UsersController {
   };
 
   update = async (request: Request, response: Response) => {
-    const result = await this.service.update(request.params.id, request.body);
+    const result = await this.service.update(request.params["id"] as string, request.body);
     response.json({ data: result });
   };
 }

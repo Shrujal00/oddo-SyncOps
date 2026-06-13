@@ -3,6 +3,7 @@ import { promisify } from "util";
 import jwt from "jsonwebtoken";
 import { env } from "../../config/env.js";
 import { HttpError } from "../../common/exceptions/http-error.js";
+import { AuditRepository } from "../audit/repository.js";
 import type {
   LoginRequestDto,
   LoginResponseDto,
@@ -32,7 +33,10 @@ function signToken(payload: { sub: string; roleId: string; roleName: string }): 
 }
 
 export class AuthService {
-  constructor(private readonly repository = new AuthRepository()) {}
+  constructor(
+    private readonly repository = new AuthRepository(),
+    private readonly auditRepo = new AuditRepository(),
+  ) {}
 
   async login(dto: LoginRequestDto): Promise<LoginResponseDto> {
     const user = await this.repository.findUserByEmail(dto.email);
@@ -42,6 +46,13 @@ export class AuthService {
     if (!valid) throw new HttpError(401, "Invalid email or password");
 
     const token = signToken({ sub: user.id, roleId: user.roleId, roleName: user.role.name });
+    await this.auditRepo.record({
+      userId: user.id,
+      eventType: "USER_LOGIN",
+      entityType: "User",
+      entityId: user.id,
+      summary: "User login",
+    });
 
     return {
       accessToken: token,

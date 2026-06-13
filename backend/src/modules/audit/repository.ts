@@ -11,13 +11,53 @@ export interface AuditRecordInput {
   occurredAt?: Date;
 }
 
+export interface ListAuditLogsFilters {
+  entityType?: string;
+  entityId?: string;
+  eventType?: AuditEventType;
+  userId?: string;
+  from?: Date;
+  to?: Date;
+  page?: number;
+  limit?: number;
+  allowedEventTypes?: AuditEventType[];
+  currentUserId?: string;
+  isAdmin?: boolean;
+}
+
 export class AuditRepository {
-  listAuditLogs() {
-    return prisma.auditLog.findMany({
-      where: { deletedAt: null },
-      orderBy: { occurredAt: "desc" },
-      take: 100,
-    });
+  async listAuditLogs(filters: ListAuditLogsFilters = {}) {
+    const { page = 1, limit = 25 } = filters;
+    const where: Prisma.AuditLogWhereInput = {
+      deletedAt: null,
+      ...(filters.entityType && { entityType: filters.entityType }),
+      ...(filters.entityId && { entityId: filters.entityId }),
+      ...(filters.eventType && { eventType: filters.eventType }),
+      ...(filters.userId && { userId: filters.userId }),
+      ...((filters.from || filters.to) && {
+        occurredAt: {
+          ...(filters.from && { gte: filters.from }),
+          ...(filters.to && { lte: filters.to }),
+        },
+      }),
+      ...(!filters.isAdmin && filters.currentUserId && {
+        OR: [
+          { userId: filters.currentUserId },
+          ...(filters.allowedEventTypes?.length ? [{ eventType: { in: filters.allowedEventTypes } }] : []),
+        ],
+      }),
+    };
+
+    const [auditLogs, total] = await Promise.all([
+      prisma.auditLog.findMany({
+        where,
+        orderBy: { occurredAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.auditLog.count({ where }),
+    ]);
+    return { auditLogs, total, page, limit };
   }
 
   async record(event: AuditRecordInput) {
@@ -32,5 +72,9 @@ export class AuditRepository {
         occurredAt: event.occurredAt ?? new Date(),
       },
     });
+  }
+
+  async logEvent(event: AuditRecordInput) {
+    await this.record(event);
   }
 }

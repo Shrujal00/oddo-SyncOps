@@ -1,13 +1,36 @@
-import type { AuditEventDto, AuditLogListResponseDto } from "./dto.js";
+import type { JwtPayload } from "../../common/middleware/auth.middleware.js";
+import type { AuditEventDto, AuditEventType, AuditLogListFiltersDto, AuditLogListResponseDto } from "./dto.js";
 import { AuditRepository } from "./repository.js";
+
+function allowedEventTypesForRole(roleName?: string): AuditEventType[] {
+  switch (roleName) {
+    case "SALES_USER":
+      return ["SALES_ORDER_CHANGED"];
+    case "PURCHASE_USER":
+      return ["PURCHASE_ORDER_CHANGED"];
+    case "MANUFACTURING_USER":
+      return ["MANUFACTURING_COMPLETED"];
+    case "INVENTORY_MANAGER":
+      return ["INVENTORY_CHANGED"];
+    case "BUSINESS_OWNER":
+      return ["SALES_ORDER_CHANGED", "PURCHASE_ORDER_CHANGED", "MANUFACTURING_COMPLETED", "INVENTORY_CHANGED", "PRODUCT_UPDATED"];
+    default:
+      return [];
+  }
+}
 
 export class AuditService {
   constructor(private readonly repository = new AuditRepository()) {}
 
-  async list(): Promise<AuditLogListResponseDto> {
-    const auditLogs = await this.repository.listAuditLogs();
+  async list(filters: AuditLogListFiltersDto = {}, user?: JwtPayload): Promise<AuditLogListResponseDto> {
+    const result = await this.repository.listAuditLogs({
+      ...filters,
+      isAdmin: user?.roleName === "ADMIN",
+      currentUserId: user?.sub,
+      allowedEventTypes: allowedEventTypesForRole(user?.roleName),
+    });
     return {
-      auditLogs: auditLogs.map((log) => ({
+      auditLogs: result.auditLogs.map((log) => ({
         id: log.id,
         userId: log.userId ?? undefined,
         eventType: log.eventType,
@@ -17,6 +40,9 @@ export class AuditService {
         metadata: log.metadata as Record<string, unknown> | undefined,
         occurredAt: log.occurredAt.toISOString(),
       })),
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
     };
   }
 

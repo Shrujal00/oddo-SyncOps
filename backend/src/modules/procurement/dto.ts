@@ -20,3 +20,21 @@ export interface ProcurementRuleEvaluationDto {
 export interface ProcurementPlanResponseDto {
   evaluations: ProcurementRuleEvaluationDto[];
 }
+
+export interface ProcurementTriggerDemandDto {
+  salesOrderId: string;
+  productId: string;
+  requiredQty: number;
+  availableQty: number;
+}
+
+export interface ProcurementActionResponseDto {
+  id: string;
+  salesOrderId?: string;
+  productId?: string;
+  actionType?: "CREATE_PURCHASE_ORDER" | "CREATE_MANUFACTURING_ORDER";
+  createdEntityType?: "PurchaseOrder" | "ManufacturingOrder";
+  createdEntityId?: string;
+  summary: string;
+  occurredAt: string;
+}

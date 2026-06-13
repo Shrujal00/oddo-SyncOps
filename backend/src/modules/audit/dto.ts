@@ -22,4 +22,18 @@ export interface AuditLogResponseDto extends AuditEventDto {
 
 export interface AuditLogListResponseDto {
   auditLogs: AuditLogResponseDto[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface AuditLogListFiltersDto {
+  entityType?: string;
+  entityId?: string;
+  eventType?: AuditEventType;
+  userId?: string;
+  from?: Date;
+  to?: Date;
+  page?: number;
+  limit?: number;
 }

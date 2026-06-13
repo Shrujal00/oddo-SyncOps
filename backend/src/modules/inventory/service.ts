@@ -1,6 +1,6 @@
 import { InventoryMovementType } from "@prisma/client";
 import { notImplemented } from "../../common/exceptions/not-implemented.js";
-import { prisma } from "../../database/prisma.js";
+import { AuditRepository } from "../audit/repository.js";
 import type {
   InventoryLedgerResponseDto,
   StockAdjustmentDto,
@@ -10,7 +10,10 @@ import type {
 import { InventoryRepository, type ListMovementsFilters } from "./repository.js";
 
 export class InventoryService {
-  constructor(private readonly repository = new InventoryRepository()) {}
+  constructor(
+    private readonly repository = new InventoryRepository(),
+    private readonly auditRepo = new AuditRepository(),
+  ) {}
 
   async listMovements(filters: ListMovementsFilters) {
     return this.repository.listMovements(filters);
@@ -46,15 +49,12 @@ export class InventoryService {
       notes: dto.reason,
       occurredAt: new Date(),
     });
-    await prisma.auditLog.create({
-      data: {
-        userId: dto.adjustedBy || null,
-        eventType: "INVENTORY_CHANGED",
-        entityType: "Product",
-        entityId: dto.productId,
-        summary: `Stock adjustment ${dto.quantityDelta > 0 ? "+" : ""}${dto.quantityDelta} — ${dto.reason}`,
-        occurredAt: new Date(),
-      },
+    await this.auditRepo.record({
+      userId: dto.adjustedBy || null,
+      eventType: "INVENTORY_CHANGED",
+      entityType: "Product",
+      entityId: dto.productId,
+      summary: `Stock adjustment ${dto.quantityDelta > 0 ? "+" : ""}${dto.quantityDelta} - ${dto.reason}`,
     });
   }
 }

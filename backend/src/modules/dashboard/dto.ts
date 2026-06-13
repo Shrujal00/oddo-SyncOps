@@ -1,21 +1,24 @@
-export interface MetricCardDto {
-  label: string;
-  value: number;
-  changePercent?: number;
-}
-
-export interface ChartPointDto {
-  label: string;
-  value: number;
-}
-
 export interface DashboardSummaryDto {
-  totalSalesOrders: MetricCardDto;
-  pendingDeliveries: MetricCardDto;
-  manufacturingOrders: MetricCardDto;
-  purchaseOrders: MetricCardDto;
-  inventoryValue: MetricCardDto;
-  lowStockProducts: MetricCardDto;
-  salesTrend: ChartPointDto[];
-  inventoryByCategory: ChartPointDto[];
+  salesOrders: {
+    total: number;
+    byStatus: Record<string, number>;
+    pendingDeliveries: number;
+  };
+  purchaseOrders: {
+    total: number;
+    byStatus: Record<string, number>;
+    partialReceipts: number;
+  };
+  manufacturingOrders: {
+    total: number;
+    byStatus: Record<string, number>;
+    inProgress: number;
+  };
+  lowStockProducts: Array<{
+    id: string;
+    sku: string;
+    name: string;
+    freeToUseQty: number;
+    reorderPoint: number;
+  }>;
 }

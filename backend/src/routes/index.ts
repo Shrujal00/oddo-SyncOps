@@ -16,11 +16,14 @@ import { vendorsRoutes } from "../modules/vendors/index.js";
 export const apiRouter = Router();
 
 apiRouter.use("/auth", authRoutes);
+apiRouter.use("/audit", auditRoutes);
 apiRouter.use("/audit-logs", auditRoutes);
 apiRouter.use("/bill-of-materials", billOfMaterialsRoutes);
+apiRouter.use("/bom", billOfMaterialsRoutes);
 apiRouter.use("/customers", customersRoutes);
 apiRouter.use("/dashboard", dashboardRoutes);
 apiRouter.use("/inventory", inventoryRoutes);
+apiRouter.use("/manufacturing", manufacturingRoutes);
 apiRouter.use("/manufacturing-orders", manufacturingRoutes);
 apiRouter.use("/procurement", procurementRoutes);
 apiRouter.use("/products", productsRoutes);

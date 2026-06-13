@@ -14,13 +14,42 @@ export class ManufacturingController {
     response.status(201).json({ data: result });
   };
 
+  confirm = async (request: Request, response: Response) => {
+    const result = await this.service.confirm(request.params["id"] as string, request.body);
+    response.json({ data: result });
+  };
+
   start = async (request: Request, response: Response) => {
-    const result = await this.service.start(request.params.id, request.body);
+    const result = await this.service.start(request.params["id"] as string, request.body);
     response.json({ data: result });
   };
 
   complete = async (request: Request, response: Response) => {
-    const result = await this.service.complete(request.params.id, request.body);
+    const result = await this.service.complete(request.params["id"] as string, request.body);
+    response.json({ data: result });
+  };
+
+  updateWorkOrder = async (request: Request, response: Response) => {
+    const result = await this.service.updateWorkOrder(
+      request.params["moId"] as string,
+      request.params["woId"] as string,
+      request.body,
+    );
+    response.json({ data: result });
+  };
+
+  listWorkCenters = async (_request: Request, response: Response) => {
+    const result = await this.service.listWorkCenters();
+    response.json({ data: result });
+  };
+
+  createWorkCenter = async (request: Request, response: Response) => {
+    const result = await this.service.createWorkCenter(request.body);
+    response.status(201).json({ data: result });
+  };
+
+  updateWorkCenter = async (request: Request, response: Response) => {
+    const result = await this.service.updateWorkCenter(request.params["id"] as string, request.body);
     response.json({ data: result });
   };
 }

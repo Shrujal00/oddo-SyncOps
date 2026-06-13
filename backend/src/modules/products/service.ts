@@ -2,6 +2,7 @@ import type { Product } from "@prisma/client";
 import type { CreateProductDto, ProductListResponseDto, ProductResponseDto, UpdateProductDto } from "./dto.js";
 import { ProductsRepository, type ListProductsFilters } from "./repository.js";
 import { InventoryRepository } from "../inventory/repository.js";
+import { AuditRepository } from "../audit/repository.js";
 
 function toNum(v: unknown): number {
   return Number(v ?? 0);
@@ -34,6 +35,7 @@ export class ProductsService {
   constructor(
     private readonly repository = new ProductsRepository(),
     private readonly inventoryRepo = new InventoryRepository(),
+    private readonly auditRepo = new AuditRepository(),
   ) {}
 
   async list(filters: ListProductsFilters & { lowStockOnly?: boolean } = {}): Promise<ProductListResponseDto> {
@@ -53,11 +55,23 @@ export class ProductsService {
 
   async create(dto: CreateProductDto): Promise<ProductResponseDto> {
     const product = await this.repository.create(dto);
+    await this.auditRepo.record({
+      eventType: "PRODUCT_UPDATED",
+      entityType: "Product",
+      entityId: product.id,
+      summary: "Product created",
+    });
     return attachStock(product, this.inventoryRepo);
   }
 
   async update(id: string, dto: UpdateProductDto): Promise<ProductResponseDto> {
     const product = await this.repository.update(id, dto);
+    await this.auditRepo.record({
+      eventType: "PRODUCT_UPDATED",
+      entityType: "Product",
+      entityId: product.id,
+      summary: "Product updated",
+    });
     return attachStock(product, this.inventoryRepo);
   }
 }

@@ -2,6 +2,7 @@ import type { SalesOrderStatus } from "@prisma/client";
 import { HttpError } from "../../common/exceptions/http-error.js";
 import { AuditRepository } from "../audit/repository.js";
 import { InventoryRepository } from "../inventory/repository.js";
+import { ProcurementService } from "../procurement/service.js";
 import type {
   CancelSalesOrderDto,
   ConfirmSalesOrderDto,
@@ -44,6 +45,7 @@ export class SalesService {
     private readonly repository = new SalesRepository(),
     private readonly inventoryRepo = new InventoryRepository(),
     private readonly auditRepo = new AuditRepository(),
+    private readonly procurementService = new ProcurementService(),
   ) {}
 
   async list(): Promise<SalesOrderListResponseDto> {
@@ -72,7 +74,12 @@ export class SalesService {
       confirmed.items.map(async (item) => {
         const stock = await this.inventoryRepo.getStockSummary(item.productId);
         if (stock.freeToUseQty < item.quantity && item.product.procureOnDemand) {
-          console.warn(`Sales order ${id} requires procurement for product ${item.productId}`);
+          await this.procurementService.triggerProcurement({
+            salesOrderId: id,
+            productId: item.productId,
+            requiredQty: item.quantity,
+            availableQty: stock.freeToUseQty,
+          }, dto.confirmedBy);
         }
       }),
     );
