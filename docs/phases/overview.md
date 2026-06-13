@@ -10,7 +10,7 @@ Last updated: 2026-06-13
 | Phase | Name | Owner | Status | Depends On |
 |-------|------|-------|--------|------------|
 | [01](./phase-01-scaffold.md) | Scaffold & Schema | Shrujal + Teesha | **DONE** | — |
-| [02](./phase-02-auth.md) | Auth & Infrastructure | Teesha | **TODO** | 01 |
+| [02](./phase-02-auth.md) | Auth & Infrastructure | Teesha | **IN_PROGRESS** | 01 |
 | [03](./phase-03-core-data.md) | Products & Inventory | Teesha + Shrujal | **TODO** | 02 |
 | [04](./phase-04-transactions.md) | Sales & Purchases | Teesha + Shrujal | **TODO** | 03 |
 | [05](./phase-05-manufacturing.md) | Manufacturing & BoM | Teesha + Shrujal | **TODO** | 03 |

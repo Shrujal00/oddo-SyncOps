@@ -1,6 +1,6 @@
 # Phase 02 — Auth & Infrastructure
 
-**Status:** TODO  
+**Status:** IN_PROGRESS  
 **Owner:** Teesha-Gokulgandhi (backend) · Shrujal00 (frontend login page)  
 **Blocks:** All other phases  
 
