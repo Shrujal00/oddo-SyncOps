@@ -1,16 +1,12 @@
 import type { Request, Response } from "express";
-import { ProductsService } from "./service.js";
+import { VendorsService } from "./service.js";
 
-export class ProductsController {
-  constructor(private readonly service = new ProductsService()) {}
+export class VendorsController {
+  constructor(private readonly service = new VendorsService()) {}
 
   list = async (request: Request, response: Response) => {
-    const { sku, name, lowStockOnly } = request.query as Record<string, string>;
-    const result = await this.service.list({
-      sku,
-      name,
-      lowStockOnly: lowStockOnly === "true",
-    });
+    const { name } = request.query as Record<string, string>;
+    const result = await this.service.list(name);
     response.json({ data: result });
   };
 

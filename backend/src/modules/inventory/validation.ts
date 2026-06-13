@@ -21,5 +21,4 @@ export const stockAdjustmentSchema = z.object({
   productId: z.string().uuid(),
   quantityDelta: z.number().int(),
   reason: z.string().min(1),
-  adjustedBy: z.string().uuid(),
 });

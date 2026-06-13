@@ -20,7 +20,6 @@ export interface StockAdjustmentDto {
   productId: string;
   quantityDelta: number;
   reason: string;
-  adjustedBy: string;
 }
 
 export interface InventoryLedgerEntryDto {
