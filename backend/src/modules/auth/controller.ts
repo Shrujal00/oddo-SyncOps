@@ -9,6 +9,11 @@ export class AuthController {
     response.status(200).json({ data: result });
   };
 
+  register = async (request: Request, response: Response) => {
+    const result = await this.service.register(request.body);
+    response.status(201).json({ data: result });
+  };
+
   forgotPassword = async (request: Request, response: Response) => {
     await this.service.requestPasswordReset(request.body);
     response.status(202).json({ data: null });

@@ -3,13 +3,25 @@ export interface LoginRequestDto {
   password: string;
 }
 
+export interface RegisterRequestDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  roleName?: string;
+}
+
+export interface AuthUserDto {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+}
+
 export interface LoginResponseDto {
   accessToken: string;
-  user: {
-    id: string;
-    email: string;
-    role: string;
-  };
+  user: AuthUserDto;
 }
 
 export interface ForgotPasswordRequestDto {
