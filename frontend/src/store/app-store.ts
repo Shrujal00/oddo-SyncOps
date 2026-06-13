@@ -1,11 +1,34 @@
+"use client";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-interface AppState {
-  activeModule: string;
-  setActiveModule: (moduleName: string) => void;
+export interface AuthUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  activeModule: "dashboard",
-  setActiveModule: (moduleName) => set({ activeModule: moduleName }),
-}));
+interface AppState {
+  accessToken: string | null;
+  user: AuthUser | null;
+  activeModule: string;
+  setAuth: (token: string, user: AuthUser) => void;
+  clearAuth: () => void;
+  setActiveModule: (module: string) => void;
+}
+
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      accessToken: null,
+      user: null,
+      activeModule: "overview",
+      setAuth: (accessToken, user) => set({ accessToken, user }),
+      clearAuth: () => set({ accessToken: null, user: null }),
+      setActiveModule: (activeModule) => set({ activeModule }),
+    }),
+    { name: "syncops-auth", partialize: (s) => ({ accessToken: s.accessToken, user: s.user }) },
+  ),
+);
