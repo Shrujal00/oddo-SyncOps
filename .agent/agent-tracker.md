@@ -6,3 +6,4 @@
 | 05 | Manufacturing & BoM | DONE |
 | 06 | Procurement Automation | DONE |
 | 07 | Audit & Dashboard | DONE |
+| 08 | Frontend Polish & User Management | DONE |

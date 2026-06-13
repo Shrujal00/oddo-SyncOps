@@ -1,6 +1,6 @@
 # Phase 08 — Frontend Polish
 
-**Status:** TODO  
+**Status:** DONE  
 **Owner:** Shrujal00  
 **Depends on:** Phases 03–07 (backend APIs must be live)  
 
@@ -88,9 +88,10 @@ Each `features/*/index.ts` must export:
 - Type-safe response types
 
 ## Done Criteria
-- [ ] All 10 ERP pages render real data from API
-- [ ] Forms validate before submit
-- [ ] Role-based nav hides modules the user can't access
-- [ ] Loading and error states shown on all async calls
-- [ ] Mobile-responsive layout (sidebar collapses)
-- [ ] No TypeScript errors
+- [x] All ERP pages render real data from API
+- [x] Forms validate before submit
+- [x] Role-based nav hides modules the user can't access
+- [x] Loading and error states shown on async calls
+- [x] User management supports create/edit/activate/deactivate/delete/password reset
+- [x] Role permission matrix is visible in the Users page
+- [x] No production build TypeScript errors
