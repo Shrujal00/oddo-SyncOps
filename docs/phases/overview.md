@@ -11,7 +11,7 @@ Last updated: 2026-06-13
 |-------|------|-------|--------|------------|
 | [01](./phase-01-scaffold.md) | Scaffold & Schema | Shrujal + Teesha | **DONE** | — |
 | [02](./phase-02-auth.md) | Auth & Infrastructure | Teesha + Shrujal | **DONE** | 01 |
-| [03](./phase-03-core-data.md) | Products & Inventory | Teesha + Shrujal | **TODO** | 02 |
+| [03](./phase-03-core-data.md) | Products & Inventory | Teesha + Shrujal | **IN_PROGRESS** (backend done, FE TODO) | 02 |
 | [04](./phase-04-transactions.md) | Sales & Purchases | Teesha + Shrujal | **TODO** | 03 |
 | [05](./phase-05-manufacturing.md) | Manufacturing & BoM | Teesha + Shrujal | **TODO** | 03 |
 | [06](./phase-06-procurement.md) | Procurement Automation | Teesha | **TODO** | 04 + 05 |

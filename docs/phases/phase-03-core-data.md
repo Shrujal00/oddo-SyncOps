@@ -1,80 +1,70 @@
 # Phase 03 — Products & Inventory
 
-**Status:** TODO  
-**Owner:** Teesha-Gokulgandhi (backend) · Shrujal00 (frontend)  
-**Depends on:** Phase 02  
+**Status:** IN_PROGRESS
+**Owner:** Teesha-Gokulgandhi (backend) · Shrujal00 (frontend)
+**Depends on:** Phase 02
 
 ## Goal
 Product CRUD with live stock quantities. Inventory movement ledger. Products page functional.
 
 ## Backend Tasks
 
-### PROD-01 · Stock compute helper
+### PROD-01 · Stock compute helper — **DONE**
 `backend/src/modules/inventory/repository.ts`
+- `getStockSummary(productId)` — PURCHASE+PRODUCTION positive, SALE+CONSUMPTION negative, ADJUSTMENT signed
+- `reservedQty` from CONFIRMED/PARTIALLY_DELIVERED SalesOrderItems
+- `freeToUseQty = onHandQty - reservedQty`
 
-```ts
-async getStockSummary(productId: string): Promise<{
-  onHandQty: number;
-  reservedQty: number;
-  freeToUseQty: number;
-}>
-```
-
-- `onHandQty`: SUM movements (PURCHASE + PRODUCTION = positive, SALE + CONSUMPTION = negative)
-- `reservedQty`: SUM undelivered qty from CONFIRMED/PARTIALLY_DELIVERED SalesOrderItems + active MO component demand
-- `freeToUseQty`: onHandQty − reservedQty
-
-### PROD-02 · Products list + get
-`GET /api/products` — filterable by `sku`, `name`, `lowStockOnly` (freeToUseQty < reorderPoint)  
-`GET /api/products/:id`  
+### PROD-02 · Products list + get — **DONE**
+`GET /api/products?sku=&name=&lowStockOnly=true`
+`GET /api/products/:id`
 Both responses include `{ onHandQty, reservedQty, freeToUseQty }`
+Auth required. All authenticated roles can read.
 
-### PROD-03 · Product create + update
-`POST /api/products` — Admin / Business Owner only  
-`PATCH /api/products/:id`  
-Validate `activeBomId` existence if provided. Validate `preferredVendorId` existence if provided.
+### PROD-03 · Product create + update — **DONE**
+`POST /api/products` — ADMIN / BUSINESS_OWNER only
+`PATCH /api/products/:id` — ADMIN / BUSINESS_OWNER only
+Validates `activeBomId` and `preferredVendorId` existence.
+Validation schema includes procurement config fields.
 
-### INV-01 · Movement write helper (internal)
-`backend/src/modules/inventory/repository.ts`
+### INV-01 · Movement write helper (internal) — **DONE**
+`backend/src/modules/inventory/repository.ts` → `recordMovement(data)`
+Internal — not a public HTTP endpoint.
 
-```ts
-async recordMovement(data: RecordMovementInput): Promise<void>
-```
+### INV-02 · Inventory movements list — **DONE**
+`GET /api/inventory/movements?productId=&type=&from=&to=` — paginated
+INVENTORY_MANAGER + ADMIN only.
 
-Called by Sales deliver, Purchase receive, Manufacturing complete. Never a public HTTP endpoint.
+### INV-03 · Manual stock adjustment — **DONE**
+`POST /api/inventory/adjustments`
+INVENTORY_MANAGER + ADMIN only. `adjustedBy` injected from JWT (not in request body).
+Writes ADJUSTMENT movement + AuditLog row.
 
-### INV-02 · Inventory movements list
-`GET /api/inventory/movements?productId=&type=&from=&to=` — paginated  
-Inventory Manager + Admin only
-
-### INV-03 · Manual stock adjustment
-`POST /api/inventory/adjustments`  
-Inventory Manager only. Creates ADJUSTMENT movement. Writes AuditLog.
-
-### PARTY-01 · Customer + Vendor CRUD
-`GET/POST/PATCH /api/customers`  
-`GET/POST/PATCH /api/vendors`  
-Needed for sales orders (customer) and purchase orders (vendor).  
-Add modules or extend existing stubs.
+### PARTY-01 · Customer + Vendor CRUD — **DONE**
+`GET/POST/PATCH /api/customers` — read: all auth; write: ADMIN, SALES_USER, BUSINESS_OWNER
+`GET/POST/PATCH /api/vendors` — read: all auth; write: ADMIN, PURCHASE_USER, BUSINESS_OWNER
+New modules at `backend/src/modules/customers/` and `backend/src/modules/vendors/`
+Registered in `backend/src/routes/index.ts`
 
 ## Frontend Tasks
 
-### FE-PROD-01 · Products page
+### FE-PROD-01 · Products page — **TODO** (NEXT)
 `frontend/src/app/(erp)/products/page.tsx`
 - Table: SKU | Name | Unit | On Hand | Reserved | Free to Use | Reorder Point
 - Highlight rows where `freeToUseQty < reorderPoint` (low stock)
 - Create / Edit modal with all product fields including procurement config
 - Role-gated create button (Admin / Business Owner only)
+- API client at `frontend/src/lib/api.ts` — `apiFetch<T>(path, { token, ...fetchInit })`
 
-### FE-INV-01 · Inventory page
+### FE-INV-01 · Inventory page — **TODO** (NEXT)
 `frontend/src/app/(erp)/inventory/page.tsx`
 - Movement ledger table: Product | Type | Qty | Reference | Date
 - Filter by product, type, date range
-- Manual adjustment form (Inventory Manager only)
+- Manual adjustment form (Inventory Manager + Admin only)
 
 ## Done Criteria
-- [ ] `GET /api/products` returns stock quantities computed from movements
-- [ ] Create product, then add purchase movement — on-hand updates
-- [ ] Low stock filter works
+- [x] `GET /api/products` returns stock quantities computed from movements
+- [ ] Create product, then add purchase movement — on-hand updates (needs FE test)
+- [ ] Low stock filter works (needs FE test)
 - [ ] Frontend products table shows live stock
-- [ ] Inventory movement list paginates correctly
+- [ ] Inventory movement list paginates correctly (backend done, FE TODO)
