@@ -1,4 +1,4 @@
-import { createHash, scrypt, timingSafeEqual } from "crypto";
+import { scrypt, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import jwt from "jsonwebtoken";
 import { env } from "../../config/env.js";

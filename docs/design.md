@@ -1,6 +1,6 @@
 # SyncOps Design System
 
-Forced dark theme. Clean, data-dense, minimal chrome. Let the data breathe.
+Light theme. Odoo-inspired color palette. Clean, data-dense, minimal chrome.
 
 ## Excalidraw Alignment Notes
 
@@ -13,16 +13,17 @@ No schema changes needed. UI must use dark forced mode (not toggle).
 
 | Token | Value | Usage |
 |---|---|---|
-| `--bg` | `#0A0A0A` | Page background |
-| `--surface` | `#111111` | Sidebar, cards |
-| `--elevated` | `#1A1A1A` | Modals, dropdowns, inputs |
-| `--border` | `#262626` | Dividers, input borders |
-| `--muted` | `#404040` | Disabled, skeleton |
-| `--text-1` | `#F5F5F5` | Primary text |
-| `--text-2` | `#A3A3A3` | Secondary / labels |
-| `--text-3` | `#525252` | Placeholder, hint |
-| `--accent` | `#6366F1` | Indigo-500, CTA buttons, links |
-| `--accent-hover` | `#818CF8` | Indigo-400, hover state |
+| `--bg` | `#FFFFFF` | Page background |
+| `--surface` | `#F8F7F5` | Page bg tint, input backgrounds |
+| `--elevated` | `#FFFFFF` | Cards, sidebar, modals |
+| `--border` | `#E5E7EB` | Dividers, input borders |
+| `--muted` | `#D1D5DB` | Disabled, skeleton |
+| `--text-1` | `#1F1F1F` | Primary text |
+| `--text-2` | `#6B7280` | Secondary / labels |
+| `--text-3` | `#9CA3AF` | Placeholder, hint |
+| `--accent` | `#714B67` | Odoo plum — CTA buttons, active nav |
+| `--accent-hover` | `#5A3A52` | Darker plum, hover state |
+| `--accent-light` | `#F3EEF2` | Tinted bg for active nav item |
 
 ## Status Badge Colors
 

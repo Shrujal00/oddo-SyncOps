@@ -7,7 +7,7 @@ export default function OverviewPage() {
       </div>
       <div className="grid grid-cols-4 gap-4 mb-6">
         {["Sales Orders", "Pending Deliveries", "Manufacturing", "Low Stock"].map((label) => (
-          <div key={label} className="bg-surface border border-[rgb(var(--border))] rounded-xl p-4">
+          <div key={label} className="bg-elevated border border-border rounded-xl p-4 shadow-sm">
             <p className="text-xs font-medium uppercase tracking-wide text-text-2">{label}</p>
             <p className="text-2xl font-semibold text-text-1 mt-2">—</p>
           </div>

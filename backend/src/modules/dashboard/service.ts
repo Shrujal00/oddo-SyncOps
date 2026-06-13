@@ -1,4 +1,3 @@
-import { notImplemented } from "../../common/exceptions/not-implemented.js";
 import type { DashboardSummaryDto } from "./dto.js";
 import { DashboardRepository } from "./repository.js";
 
