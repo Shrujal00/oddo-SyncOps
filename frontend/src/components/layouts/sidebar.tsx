@@ -1,19 +1,37 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  Boxes,
+  Building2,
+  ClipboardList,
+  Factory,
+  Gauge,
+  History,
+  LogOut,
+  Package,
+  PackageCheck,
+  ShoppingCart,
+  UserRound,
+  Users,
+  Wrench,
+} from "lucide-react";
 import { useAppStore } from "../../store/app-store";
 
 const NAV = [
-  { label: "Overview",          href: "/overview",              icon: "⊞", roles: ["*"] },
-  { label: "Products",          href: "/erp/products",          icon: "◈", roles: ["*"] },
-  { label: "Sales",             href: "/erp/sales",             icon: "↗", roles: ["ADMIN","SALES_USER","INVENTORY_MANAGER","BUSINESS_OWNER"] },
-  { label: "Purchases",         href: "/erp/purchases",         icon: "↙", roles: ["ADMIN","PURCHASE_USER","INVENTORY_MANAGER","BUSINESS_OWNER"] },
-  { label: "Manufacturing",     href: "/erp/manufacturing",     icon: "⚙", roles: ["ADMIN","MANUFACTURING_USER","BUSINESS_OWNER"] },
-  { label: "Bill of Materials", href: "/erp/bill-of-materials", icon: "≡", roles: ["ADMIN","MANUFACTURING_USER","BUSINESS_OWNER"] },
-  { label: "Inventory",         href: "/erp/inventory",         icon: "▤", roles: ["ADMIN","INVENTORY_MANAGER","BUSINESS_OWNER"] },
-  { label: "Procurement",       href: "/erp/procurement",       icon: "⟳", roles: ["ADMIN","INVENTORY_MANAGER"] },
-  { label: "Audit",             href: "/erp/audit",             icon: "◎", roles: ["ADMIN","BUSINESS_OWNER"] },
-  { label: "Users",             href: "/erp/users",             icon: "◉", roles: ["ADMIN"] },
+  { label: "Overview", href: "/overview", icon: Gauge, roles: ["*"] },
+  { label: "Products", href: "/products", icon: Package, roles: ["*"] },
+  { label: "Sales", href: "/sales", icon: ShoppingCart, roles: ["ADMIN", "SALES_USER", "INVENTORY_MANAGER", "BUSINESS_OWNER"] },
+  { label: "Customers", href: "/customers", icon: UserRound, roles: ["ADMIN", "SALES_USER", "BUSINESS_OWNER"] },
+  { label: "Purchases", href: "/purchases", icon: PackageCheck, roles: ["ADMIN", "PURCHASE_USER", "INVENTORY_MANAGER", "BUSINESS_OWNER"] },
+  { label: "Vendors", href: "/vendors", icon: Building2, roles: ["ADMIN", "PURCHASE_USER", "BUSINESS_OWNER"] },
+  { label: "Manufacturing", href: "/manufacturing", icon: Factory, roles: ["ADMIN", "MANUFACTURING_USER", "BUSINESS_OWNER"] },
+  { label: "Bill of Materials", href: "/bill-of-materials", icon: ClipboardList, roles: ["ADMIN", "MANUFACTURING_USER", "BUSINESS_OWNER"] },
+  { label: "Inventory", href: "/inventory", icon: Boxes, roles: ["ADMIN", "INVENTORY_MANAGER", "BUSINESS_OWNER"] },
+  { label: "Procurement", href: "/procurement", icon: Wrench, roles: ["ADMIN", "INVENTORY_MANAGER"] },
+  { label: "Audit", href: "/audit", icon: History, roles: ["ADMIN", "BUSINESS_OWNER"] },
+  { label: "Users", href: "/users", icon: Users, roles: ["ADMIN"] },
 ];
 
 export function Sidebar() {
@@ -28,26 +46,21 @@ export function Sidebar() {
   }
 
   const role = user?.role ?? "";
-  const visible = NAV.filter((item) =>
-    item.roles.includes("*") || item.roles.includes(role)
-  );
+  const visible = NAV.filter((item) => item.roles.includes("*") || item.roles.includes(role));
 
   return (
     <aside className="w-[220px] shrink-0 flex flex-col h-screen bg-elevated border-r border-border sticky top-0">
-      {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 py-4 border-b border-border">
         <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center shrink-0">
-          <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-            <path d="M3 10L10 3L17 10M5 8V17H15V8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <Boxes size={16} className="text-white" />
         </div>
         <span className="text-sm font-semibold text-text-1">SyncOps</span>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
         {visible.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const Icon = item.icon;
           return (
             <Link
               key={item.href}
@@ -58,14 +71,13 @@ export function Sidebar() {
                   : "text-text-2 hover:text-text-1 hover:bg-surface"
               }`}
             >
-              <span className="text-base leading-none w-4 text-center">{item.icon}</span>
+              <Icon size={16} />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      {/* User */}
       <div className="px-3 py-3 border-t border-border">
         {user && (
           <div className="flex items-center gap-2.5 px-2 py-1.5 mb-1">
@@ -82,7 +94,7 @@ export function Sidebar() {
           onClick={logout}
           className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-2 hover:text-text-1 hover:bg-surface transition-colors"
         >
-          <span className="text-base leading-none w-4 text-center">→</span>
+          <LogOut size={16} />
           Sign out
         </button>
       </div>

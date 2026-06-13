@@ -19,6 +19,7 @@ interface Product {
   sku: string;
   name: string;
   standardCost: number;
+  supplyStrategy: "BUY" | "MAKE";
 }
 
 interface PurchaseOrderItem {
@@ -198,7 +199,7 @@ export default function PurchasesPage() {
 
   const orders = data?.purchaseOrders ?? [];
   const vendors = vendorsData?.vendors ?? [];
-  const products = productsData?.products ?? [];
+  const products = (productsData?.products ?? []).filter((product) => product.supplyStrategy === "BUY");
 
   function closeCreate() {
     setShowCreate(false);

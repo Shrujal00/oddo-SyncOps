@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Copy, Plus, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { apiFetch } from "../../../lib/api";
@@ -10,6 +10,7 @@ interface Product {
   id: string;
   sku: string;
   name: string;
+  supplyStrategy: "BUY" | "MAKE";
 }
 
 interface WorkCenter {
@@ -91,6 +92,8 @@ export default function BillOfMaterialsPage() {
   });
 
   const products = productsData?.products ?? [];
+  const finishedProducts = products.filter((product) => product.supplyStrategy === "MAKE");
+  const componentProducts = products.filter((product) => product.supplyStrategy === "BUY");
   const boms = bomsData ?? [];
 
   function closeCreate() {
@@ -128,7 +131,7 @@ export default function BillOfMaterialsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-surface border-b border-border">
-                  {["Product", "Name", "Version", "Status", "Components"].map((h) => (
+                  {["Product", "BoM ID", "Name", "Version", "Status", "Components"].map((h) => (
                     <th key={h} className="text-left px-4 py-2.5 text-xs font-medium text-text-3">{h}</th>
                   ))}
                 </tr>
@@ -137,6 +140,17 @@ export default function BillOfMaterialsPage() {
                 {boms.map((bom) => (
                   <tr key={bom.id} className="border-b border-border last:border-0 bg-bg hover:bg-surface">
                     <td className="px-4 py-3 font-medium text-text-1">{productName(bom.productId)}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText(bom.id)}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg px-2 py-1 font-mono text-[11px] text-text-2 hover:bg-surface hover:text-accent"
+                        title={bom.id}
+                      >
+                        <Copy size={12} />
+                        {bom.id.slice(0, 8)}...
+                      </button>
+                    </td>
                     <td className="px-4 py-3 text-text-1">{bom.name}</td>
                     <td className="px-4 py-3 text-text-2">{bom.version}</td>
                     <td className="px-4 py-3">
@@ -165,7 +179,7 @@ export default function BillOfMaterialsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <Select label="Product" value={form.productId} onChange={(v) => setForm((f) => ({ ...f, productId: v }))}>
                   <option value="">Select product</option>
-                  {products.map((product) => <option key={product.id} value={product.id}>{product.name} ({product.sku})</option>)}
+                  {finishedProducts.map((product) => <option key={product.id} value={product.id}>{product.name} ({product.sku})</option>)}
                 </Select>
                 <Field label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
                 <Field label="Version" value={form.version} onChange={(v) => setForm((f) => ({ ...f, version: v }))} />
@@ -180,7 +194,7 @@ export default function BillOfMaterialsPage() {
                   <div key={index} className="grid grid-cols-[1fr_5rem_6rem_2rem] gap-2 items-end">
                     <Select label="Component" value={item.componentProductId} onChange={(v) => setForm((f) => ({ ...f, items: f.items.map((it, i) => i === index ? { ...it, componentProductId: v } : it) }))}>
                       <option value="">Select product</option>
-                      {products.map((product) => <option key={product.id} value={product.id}>{product.name} ({product.sku})</option>)}
+                      {componentProducts.map((product) => <option key={product.id} value={product.id}>{product.name} ({product.sku})</option>)}
                     </Select>
                     <Field label="Qty" type="number" value={String(item.quantity)} onChange={(v) => setForm((f) => ({ ...f, items: f.items.map((it, i) => i === index ? { ...it, quantity: Number(v) } : it) }))} />
                     <Field label="Scrap %" type="number" value={String(item.scrapPercentage ?? 0)} onChange={(v) => setForm((f) => ({ ...f, items: f.items.map((it, i) => i === index ? { ...it, scrapPercentage: Number(v) } : it) }))} />

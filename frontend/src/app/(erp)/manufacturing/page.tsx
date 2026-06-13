@@ -9,7 +9,7 @@ import { useAppStore } from "../../../store/app-store";
 type MoStatus = "DRAFT" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED";
 type WoStatus = "PLANNED" | "RELEASED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
-interface Product { id: string; sku: string; name: string }
+interface Product { id: string; sku: string; name: string; supplyStrategy: "BUY" | "MAKE" }
 interface WorkCenter { id: string; name: string; description?: string }
 interface WorkOrder {
   id: string;
@@ -121,7 +121,7 @@ export default function ManufacturingPage() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const products = productsData?.products ?? [];
+  const products = (productsData?.products ?? []).filter((product) => product.supplyStrategy === "MAKE");
 
   function closeCreate() {
     setShowCreate(false);

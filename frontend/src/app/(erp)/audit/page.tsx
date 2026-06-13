@@ -7,6 +7,7 @@ import { useAppStore } from "../../../store/app-store";
 
 type AuditEventType =
   | "USER_LOGIN"
+  | "USER_CHANGED"
   | "PRODUCT_UPDATED"
   | "SALES_ORDER_CHANGED"
   | "PURCHASE_ORDER_CHANGED"
@@ -29,6 +30,7 @@ interface AuditResponse {
 
 const EVENT_TYPES: AuditEventType[] = [
   "USER_LOGIN",
+  "USER_CHANGED",
   "PRODUCT_UPDATED",
   "SALES_ORDER_CHANGED",
   "PURCHASE_ORDER_CHANGED",
@@ -38,6 +40,7 @@ const EVENT_TYPES: AuditEventType[] = [
 
 const TYPE_COLORS: Record<AuditEventType, string> = {
   USER_LOGIN: "bg-gray-100 text-gray-700",
+  USER_CHANGED: "bg-indigo-100 text-indigo-700",
   PRODUCT_UPDATED: "bg-purple-100 text-purple-700",
   SALES_ORDER_CHANGED: "bg-blue-100 text-blue-700",
   PURCHASE_ORDER_CHANGED: "bg-emerald-100 text-emerald-700",
