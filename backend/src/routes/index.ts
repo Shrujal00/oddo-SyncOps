@@ -25,6 +25,8 @@ apiRouter.use("/manufacturing-orders", manufacturingRoutes);
 apiRouter.use("/procurement", procurementRoutes);
 apiRouter.use("/products", productsRoutes);
 apiRouter.use("/purchase-orders", purchasesRoutes);
+apiRouter.use("/purchases", purchasesRoutes);
 apiRouter.use("/sales-orders", salesRoutes);
+apiRouter.use("/sales", salesRoutes);
 apiRouter.use("/users", usersRoutes);
 apiRouter.use("/vendors", vendorsRoutes);

@@ -1,9 +1,9 @@
 export type PurchaseOrderStatus =
-  | "Draft"
-  | "Confirmed"
-  | "PartiallyReceived"
-  | "Received"
-  | "Cancelled";
+  | "DRAFT"
+  | "CONFIRMED"
+  | "PARTIALLY_RECEIVED"
+  | "RECEIVED"
+  | "CANCELLED";
 
 export interface PurchaseOrderItemDto {
   productId: string;
@@ -16,6 +16,12 @@ export interface CreatePurchaseOrderDto {
   orderDate: string;
   expectedDate?: string;
   items: PurchaseOrderItemDto[];
+  notes?: string;
+}
+
+export interface UpdatePurchaseOrderDto {
+  expectedDate?: string;
+  items?: PurchaseOrderItemDto[];
   notes?: string;
 }
 
@@ -40,8 +46,17 @@ export interface PurchaseOrderResponseDto {
   id: string;
   orderNumber: string;
   vendorId: string;
+  vendor?: { id: string; name: string };
   status: PurchaseOrderStatus;
-  items: PurchaseOrderItemDto[];
+  orderDate: string;
+  expectedDate?: string;
+  notes?: string;
+  items: Array<PurchaseOrderItemDto & {
+    id: string;
+    receivedQty: number;
+    product?: { id: string; sku: string; name: string };
+  }>;
+  totalValue: number;
 }
 
 export interface PurchaseOrderListResponseDto {

@@ -14,18 +14,23 @@ export class PurchasesController {
     response.status(201).json({ data: result });
   };
 
+  update = async (request: Request, response: Response) => {
+    const result = await this.service.update(request.params["id"] as string, request.body);
+    response.json({ data: result });
+  };
+
   confirm = async (request: Request, response: Response) => {
-    const result = await this.service.confirm(request.params.id, request.body);
+    const result = await this.service.confirm(request.params["id"] as string, request.body);
     response.json({ data: result });
   };
 
   receive = async (request: Request, response: Response) => {
-    const result = await this.service.receive(request.params.id, request.body);
+    const result = await this.service.receive(request.params["id"] as string, request.body);
     response.json({ data: result });
   };
 
   cancel = async (request: Request, response: Response) => {
-    const result = await this.service.cancel(request.params.id, request.body);
+    const result = await this.service.cancel(request.params["id"] as string, request.body);
     response.json({ data: result });
   };
 }

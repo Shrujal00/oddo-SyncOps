@@ -14,6 +14,10 @@ export const createPurchaseOrderSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const updatePurchaseOrderSchema = createPurchaseOrderSchema
+  .pick({ expectedDate: true, items: true, notes: true })
+  .partial();
+
 export const confirmPurchaseOrderSchema = z.object({
   confirmedBy: z.string().uuid(),
 });

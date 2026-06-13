@@ -1,9 +1,9 @@
 export type SalesOrderStatus =
-  | "Draft"
-  | "Confirmed"
-  | "PartiallyDelivered"
-  | "Delivered"
-  | "Cancelled";
+  | "DRAFT"
+  | "CONFIRMED"
+  | "PARTIALLY_DELIVERED"
+  | "DELIVERED"
+  | "CANCELLED";
 
 export interface SalesOrderItemDto {
   productId: string;
@@ -46,8 +46,17 @@ export interface SalesOrderResponseDto {
   id: string;
   orderNumber: string;
   customerId: string;
+  customer?: { id: string; name: string };
   status: SalesOrderStatus;
-  items: SalesOrderItemDto[];
+  orderDate: string;
+  requestedDate?: string;
+  notes?: string;
+  items: Array<SalesOrderItemDto & {
+    id: string;
+    deliveredQty: number;
+    product?: { id: string; sku: string; name: string };
+  }>;
+  totalValue: number;
 }
 
 export interface SalesOrderListResponseDto {
