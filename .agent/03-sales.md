@@ -9,7 +9,7 @@
 ## Tasks
 
 ### SALES-01 · Create + Update sales order (DRAFT)
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/sales/service.ts`, `repository.ts`, `validation.ts`  
 **What to implement:**
 - `create(dto)`: generate orderNumber (e.g. `SO-YYYYMMDD-XXXX`), create SalesOrder in DRAFT with items
@@ -17,7 +17,7 @@
 - No stock impact at this stage
 
 ### SALES-02 · Confirm sales order
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/sales/service.ts`  
 **What to implement:**
 1. Transition DRAFT → CONFIRMED
@@ -29,7 +29,7 @@
 **Reservation note:** Reservations are tracked implicitly — "reserved" = sum of undelivered confirmed sales order items. No separate reservation table needed.
 
 ### SALES-03 · Deliver sales order
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/sales/service.ts`  
 **What to implement:**
 1. Accept partial delivery: `{ items: [{ salesOrderItemId, deliveredQty }] }`
@@ -40,7 +40,7 @@
 6. Write AuditLog: SALES_ORDER_CHANGED
 
 ### SALES-04 · Cancel sales order
-**Status:** TODO  
+**Status:** DONE
 **Files:** `backend/src/modules/sales/service.ts`  
 **What to implement:**
 - Only DRAFT or CONFIRMED → CANCELLED

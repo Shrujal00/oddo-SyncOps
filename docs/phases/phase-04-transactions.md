@@ -1,6 +1,6 @@
 # Phase 04 — Sales & Purchases
 
-**Status:** TODO  
+**Status:** DONE
 **Owner:** Teesha-Gokulgandhi (backend) · Shrujal00 (frontend)  
 **Depends on:** Phase 03  
 
@@ -72,9 +72,9 @@ Body: `{ items: [{ purchaseOrderItemId, receivedQty }] }`
 - Confirm / Receive (partial form) / Cancel actions
 
 ## Done Criteria
-- [ ] Create SO → confirm → stock is reserved (freeToUseQty decreases)
-- [ ] Deliver SO → SALE movement written → onHandQty decreases
-- [ ] Create PO → confirm → receive → PURCHASE movement → onHandQty increases
-- [ ] Partial delivery sets status PARTIALLY_DELIVERED
-- [ ] Cancel only works in allowed states
-- [ ] Frontend order lists show correct status badges
+- [x] Create SO → confirm → stock is reserved (freeToUseQty decreases)
+- [x] Deliver SO → SALE movement written → onHandQty decreases
+- [x] Create PO → confirm → receive → PURCHASE movement → onHandQty increases
+- [x] Partial delivery sets status PARTIALLY_DELIVERED
+- [x] Cancel only works in allowed states
+- [x] Frontend order lists show correct status badges

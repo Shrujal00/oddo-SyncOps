@@ -17,8 +17,8 @@ AI agents and humans: **read this before touching any code.**
 | [00-infrastructure.md](./00-infrastructure.md) | Auth, RBAC guard, seed, design system, app shell | **DONE** |
 | [01-products.md](./01-products.md) | Product CRUD + stock qty compute | TODO |
 | [02-inventory.md](./02-inventory.md) | InventoryMovement ledger | TODO |
-| [03-sales.md](./03-sales.md) | Sales orders, confirm, deliver | TODO |
-| [04-purchases.md](./04-purchases.md) | Purchase orders, receive | TODO |
+| [03-sales.md](./03-sales.md) | Sales orders, confirm, deliver | **DONE** |
+| [04-purchases.md](./04-purchases.md) | Purchase orders, receive | **DONE** |
 | [05-manufacturing.md](./05-manufacturing.md) | MO, Work Orders, BoM, WorkCenter | TODO |
 | [06-procurement.md](./06-procurement.md) | MTS/MTO automation trigger | TODO |
 | [07-audit.md](./07-audit.md) | Audit log writes + query | TODO |
