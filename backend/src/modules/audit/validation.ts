@@ -4,6 +4,7 @@ export const auditEventSchema = z.object({
   userId: z.string().uuid().optional(),
   eventType: z.enum([
     "USER_LOGIN",
+    "USER_CHANGED",
     "PRODUCT_UPDATED",
     "SALES_ORDER_CHANGED",
     "PURCHASE_ORDER_CHANGED",

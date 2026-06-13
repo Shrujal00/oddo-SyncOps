@@ -12,6 +12,13 @@ export class UsersRepository {
     });
   }
 
+  listRoles() {
+    return prisma.role.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: "asc" },
+    });
+  }
+
   async findById(id: string) {
     const user = await prisma.user.findFirst({
       where: { id, deletedAt: null },
@@ -27,6 +34,13 @@ export class UsersRepository {
     return role;
   }
 
+  async updateRole(name: RoleName, description: string) {
+    return prisma.role.update({
+      where: { name },
+      data: { description },
+    });
+  }
+
   async create(dto: CreateUserDto & { roleName: RoleName }) {
     const role = await this.findRoleByName(dto.roleName);
     return prisma.user.create({
@@ -35,7 +49,7 @@ export class UsersRepository {
         firstName: dto.firstName,
         lastName: dto.lastName,
         roleId: role.id,
-        passwordHash: "created-from-users-module:password-reset-required",
+        passwordHash: dto.password!,
       },
       include: { role: true },
     });
@@ -47,10 +61,24 @@ export class UsersRepository {
     return prisma.user.update({
       where: { id },
       data: {
+        ...(dto.email !== undefined && { email: dto.email.toLowerCase() }),
         ...(dto.firstName !== undefined && { firstName: dto.firstName }),
         ...(dto.lastName !== undefined && { lastName: dto.lastName }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+        ...(dto.password !== undefined && { passwordHash: dto.password }),
         ...(role && { roleId: role.id }),
+      },
+      include: { role: true },
+    });
+  }
+
+  async softDelete(id: string) {
+    await this.findById(id);
+    return prisma.user.update({
+      where: { id },
+      data: {
+        isActive: false,
+        deletedAt: new Date(),
       },
       include: { role: true },
     });

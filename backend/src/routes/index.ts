@@ -15,6 +15,25 @@ import { vendorsRoutes } from "../modules/vendors/index.js";
 
 export const apiRouter = Router();
 
+apiRouter.get("/", (_request, response) => {
+  response.json({
+    service: "syncops-api",
+    status: "ok",
+    routes: [
+      "/api/auth",
+      "/api/products",
+      "/api/sales",
+      "/api/purchases",
+      "/api/manufacturing",
+      "/api/bom",
+      "/api/inventory",
+      "/api/procurement",
+      "/api/audit",
+      "/api/dashboard",
+    ],
+  });
+});
+
 apiRouter.use("/auth", authRoutes);
 apiRouter.use("/audit", auditRoutes);
 apiRouter.use("/audit-logs", auditRoutes);

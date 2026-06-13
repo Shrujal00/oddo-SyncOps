@@ -1,5 +1,6 @@
 export type AuditEventType =
   | "USER_LOGIN"
+  | "USER_CHANGED"
   | "PRODUCT_UPDATED"
   | "SALES_ORDER_CHANGED"
   | "PURCHASE_ORDER_CHANGED"
