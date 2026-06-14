@@ -26,3 +26,4 @@ customersRoutes.patch(
   validateBody(updateCustomerSchema),
   asyncHandler(controller.update),
 );
+customersRoutes.delete("/:id", requireRoles("ADMIN"), asyncHandler(controller.remove));

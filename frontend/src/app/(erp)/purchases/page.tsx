@@ -88,6 +88,7 @@ export default function PurchasesPage() {
   const { accessToken, user } = useAppStore();
   const qc = useQueryClient();
   const canWrite = user?.role === "ADMIN" || user?.role === "BUSINESS_OWNER" || user?.role === "PURCHASE_USER";
+  const isAdmin = user?.role === "ADMIN";
 
   const [showCreate, setShowCreate] = useState(false);
   const [receiptOrder, setReceiptOrder] = useState<PurchaseOrder | null>(null);
@@ -171,6 +172,12 @@ export default function PurchasesPage() {
       setActionError("");
       qc.invalidateQueries({ queryKey: ["purchase-orders"] });
     },
+    onError: (e: Error) => setActionError(e.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiFetch(`/purchases/${id}`, { method: "DELETE", token: accessToken ?? undefined }),
+    onSuccess: () => { setActionError(""); qc.invalidateQueries({ queryKey: ["purchase-orders"] }); qc.invalidateQueries({ queryKey: ["products"] }); },
     onError: (e: Error) => setActionError(e.message),
   });
 
@@ -304,6 +311,11 @@ export default function PurchasesPage() {
                           {["DRAFT", "CONFIRMED"].includes(order.status) && (
                             <IconButton label="Cancel" onClick={() => cancelMutation.mutate(order.id)} disabled={!user?.id || cancelMutation.isPending}>
                               <X size={15} />
+                            </IconButton>
+                          )}
+                          {isAdmin && (
+                            <IconButton label="Delete" onClick={() => { if (window.confirm(`Delete ${order.orderNumber}?`)) deleteMutation.mutate(order.id); }} disabled={deleteMutation.isPending}>
+                              <Trash2 size={15} />
                             </IconButton>
                           )}
                         </div>

@@ -29,4 +29,9 @@ export class ProductsController {
     const result = await this.service.update(request.params["id"] as string, request.body);
     response.json({ data: result });
   };
+
+  remove = async (request: Request, response: Response) => {
+    const result = await this.service.remove(request.params["id"] as string);
+    response.json({ data: result });
+  };
 }

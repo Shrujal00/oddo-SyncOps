@@ -25,3 +25,4 @@ salesRoutes.patch("/:id", validateBody(updateSalesOrderSchema), asyncHandler(con
 salesRoutes.post("/:id/confirm", validateBody(confirmSalesOrderSchema), asyncHandler(controller.confirm));
 salesRoutes.post("/:id/deliver", validateBody(deliverSalesOrderSchema), asyncHandler(controller.deliver));
 salesRoutes.post("/:id/cancel", validateBody(cancelSalesOrderSchema), asyncHandler(controller.cancel));
+salesRoutes.delete("/:id", requireRoles("ADMIN"), asyncHandler(controller.remove));

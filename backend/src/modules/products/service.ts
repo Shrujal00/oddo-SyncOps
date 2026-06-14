@@ -75,4 +75,15 @@ export class ProductsService {
     });
     return attachStock(product, this.inventoryRepo);
   }
+
+  async remove(id: string): Promise<ProductResponseDto> {
+    const product = await this.repository.softDelete(id);
+    await this.auditRepo.record({
+      eventType: "PRODUCT_UPDATED",
+      entityType: "Product",
+      entityId: product.id,
+      summary: "Product deleted",
+    });
+    return attachStock(product, this.inventoryRepo);
+  }
 }

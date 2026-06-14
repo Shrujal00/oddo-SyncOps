@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Pencil, Trash2 } from "lucide-react";
 import { useAppStore } from "../../../store/app-store";
 import { apiFetch } from "../../../lib/api";
 
@@ -135,6 +136,19 @@ export default function ProductsPage() {
     onError: (e: Error) => setError(e.message),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/products/${id}`, {
+        method: "DELETE",
+        token: accessToken ?? undefined,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["products"] });
+      setError("");
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+
   function openCreate() {
     setForm(EMPTY_FORM);
     setError("");
@@ -174,6 +188,12 @@ export default function ProductsPage() {
     }
   }
 
+  function deleteProduct(product: Product) {
+    const confirmed = window.confirm(`Delete product "${product.name}"?`);
+    if (!confirmed) return;
+    deleteMutation.mutate(product.id);
+  }
+
   const products = data?.products ?? [];
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
@@ -196,6 +216,9 @@ export default function ProductsPage() {
       </div>
 
       {/* Filters */}
+      {error && !modal && (
+        <div className="px-6 py-3 bg-red-50 border-b border-red-200 text-xs text-red-700">{error}</div>
+      )}
       <div className="flex items-center gap-3 px-6 py-3 border-b border-border bg-surface">
         <input
           value={search}
@@ -278,12 +301,19 @@ export default function ProductsPage() {
                       <td className="px-4 py-3 text-text-2">{p.reorderPoint}</td>
                       <td className="px-4 py-3">
                         {canWrite && (
-                          <button
-                            onClick={() => openEdit(p)}
-                            className="text-xs text-accent hover:underline"
-                          >
-                            Edit
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <IconButton label="Edit product" onClick={() => openEdit(p)}>
+                              <Pencil size={15} />
+                            </IconButton>
+                            <IconButton
+                              label="Delete product"
+                              onClick={() => deleteProduct(p)}
+                              disabled={deleteMutation.isPending}
+                              danger
+                            >
+                              <Trash2 size={15} />
+                            </IconButton>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -420,5 +450,36 @@ function SelectField({
         ))}
       </select>
     </div>
+  );
+}
+
+function IconButton({
+  label,
+  onClick,
+  children,
+  disabled,
+  danger,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+  disabled?: boolean;
+  danger?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border transition-colors disabled:opacity-50 ${
+        danger
+          ? "text-text-2 hover:bg-red-50 hover:text-red-600"
+          : "text-text-2 hover:bg-accent-light hover:text-accent"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

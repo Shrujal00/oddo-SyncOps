@@ -36,4 +36,9 @@ export class CustomersRepository {
       },
     });
   }
+
+  async softDelete(id: string) {
+    await this.getById(id);
+    return prisma.customer.update({ where: { id }, data: { deletedAt: new Date() } });
+  }
 }

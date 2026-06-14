@@ -142,4 +142,9 @@ export class PurchasesService {
     });
     return toDto(cancelled);
   }
+
+  async remove(id: string): Promise<{ id: string }> {
+    await this.repository.softDelete(id);
+    return { id };
+  }
 }

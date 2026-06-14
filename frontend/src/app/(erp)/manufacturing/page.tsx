@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Factory, PackageCheck, Play, Plus } from "lucide-react";
+import { Check, Factory, PackageCheck, Play, Plus, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { apiFetch } from "../../../lib/api";
@@ -46,6 +46,7 @@ export default function ManufacturingPage() {
   const { accessToken, user } = useAppStore();
   const qc = useQueryClient();
   const canWrite = user?.role === "ADMIN" || user?.role === "BUSINESS_OWNER" || user?.role === "MANUFACTURING_USER";
+  const isAdmin = user?.role === "ADMIN";
   const [showCreate, setShowCreate] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -112,6 +113,12 @@ export default function ManufacturingPage() {
     onError: (e: Error) => setError(e.message),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiFetch(`/manufacturing/${id}`, { method: "DELETE", token: accessToken ?? undefined }),
+    onSuccess: () => { setError(""); qc.invalidateQueries({ queryKey: ["manufacturing-orders"] }); qc.invalidateQueries({ queryKey: ["products"] }); },
+    onError: (e: Error) => setError(e.message),
+  });
+
   const workCenterMutation = useMutation({
     mutationFn: () => apiFetch("/manufacturing/work-centers", { method: "POST", token: accessToken ?? undefined, body: JSON.stringify(workCenterForm) }),
     onSuccess: () => {
@@ -170,6 +177,7 @@ export default function ManufacturingPage() {
                       {order.status === "DRAFT" && <IconButton label="Confirm" onClick={() => actionMutation.mutate({ id: order.id, action: "confirm" })}><Check size={15} /></IconButton>}
                       {order.status === "CONFIRMED" && <IconButton label="Start" onClick={() => actionMutation.mutate({ id: order.id, action: "start" })}><Play size={15} /></IconButton>}
                       {order.status === "IN_PROGRESS" && <IconButton label="Complete" onClick={() => actionMutation.mutate({ id: order.id, action: "complete" })}><PackageCheck size={15} /></IconButton>}
+                      {isAdmin && <IconButton label="Delete" onClick={() => { if (window.confirm(`Delete ${order.orderNumber}?`)) deleteMutation.mutate(order.id); }}><Trash2 size={15} /></IconButton>}
                     </div>
                   )}
                 </div>

@@ -71,10 +71,15 @@ async function seedRoles() {
 async function seedUsers() {
   const users: DemoUser[] = [
     { email: "admin@syncops.dev", password: "Admin@1234", firstName: "System", lastName: "Admin", role: "ADMIN" },
+    { email: "sales@syncops.dev", password: "Welcome@123", firstName: "Priya", lastName: "Sharma", role: "SALES_USER" },
+    { email: "purchase@syncops.dev", password: "Welcome@123", firstName: "Ravi", lastName: "Kumar", role: "PURCHASE_USER" },
+    { email: "mfg@syncops.dev", password: "Welcome@123", firstName: "Arjun", lastName: "Singh", role: "MANUFACTURING_USER" },
+    { email: "inventory@syncops.dev", password: "Welcome@123", firstName: "Meena", lastName: "Patel", role: "INVENTORY_MANAGER" },
+    { email: "owner@syncops.dev", password: "Welcome@123", firstName: "Shiv", lastName: "Agarwal", role: "BUSINESS_OWNER" },
   ];
 
   await prisma.user.updateMany({
-    where: { email: { not: "admin@syncops.dev" } },
+    where: { email: { notIn: users.map((u) => u.email) } },
     data: { isActive: false, deletedAt: new Date() },
   });
 
@@ -206,6 +211,19 @@ async function seedProducts(timberWorldId: string, fastPackId: string) {
       supplyStrategy: "MAKE" as const,
     },
     {
+      sku: "CHAIR-WOOD-001",
+      name: "Wooden Chair",
+      description: "Make-to-stock wooden chair — high volume product",
+      productType: "FINISHED_PRODUCT" as const,
+      unitOfMeasure: "pcs",
+      standardCost: 550,
+      sellingPrice: 950,
+      reorderPoint: 20,
+      procureOnDemand: false,
+      procurementMode: "MTS" as const,
+      supplyStrategy: "MAKE" as const,
+    },
+    {
       sku: "CHAIR-OFFICE-001",
       name: "Office Chair",
       description: "Make-to-order office chair",
@@ -304,6 +322,16 @@ async function seedBoMs(products: Record<string, { id: string }>) {
   });
 
   await upsertBom({
+    productId: products["CHAIR-WOOD-001"].id,
+    name: "Wooden Chair BoM",
+    version: "1.0",
+    items: [
+      { productId: products["LEG-WOOD-001"].id, quantity: 4 },
+      { productId: products["SCREW-STD-001"].id, quantity: 8 },
+    ],
+  });
+
+  await upsertBom({
     productId: products["CHAIR-OFFICE-001"].id,
     name: "Office Chair BoM",
     version: "1.0",
@@ -345,11 +373,19 @@ async function seedStock(products: Record<string, { id: string }>) {
         occurredAt: new Date(),
       },
       {
+        productId: products["CHAIR-WOOD-001"].id,
+        movementType: "PRODUCTION",
+        quantity: 100,
+        referenceType: "Seed",
+        notes: "MTS product — high stock for demo",
+        occurredAt: new Date(),
+      },
+      {
         productId: products["TABLE-WOOD-001"].id,
         movementType: "PRODUCTION",
-        quantity: 10,
+        quantity: 2,
         referenceType: "Seed",
-        notes: "Finished goods opening stock",
+        notes: "MTO product — low stock to trigger auto-procurement demo",
         occurredAt: new Date(),
       },
       {
@@ -406,7 +442,12 @@ async function main() {
     console.log("- no demo products, partners, orders, inventory, or manufacturing data");
   }
 
-  console.log("Admin: admin@syncops.dev / Admin@1234");
+  console.log("  admin@syncops.dev / Admin@1234  (ADMIN)");
+  console.log("  sales@syncops.dev / Welcome@123  (SALES_USER)");
+  console.log("  purchase@syncops.dev / Welcome@123  (PURCHASE_USER)");
+  console.log("  mfg@syncops.dev / Welcome@123  (MANUFACTURING_USER)");
+  console.log("  inventory@syncops.dev / Welcome@123  (INVENTORY_MANAGER)");
+  console.log("  owner@syncops.dev / Welcome@123  (BUSINESS_OWNER)");
 }
 
 main()

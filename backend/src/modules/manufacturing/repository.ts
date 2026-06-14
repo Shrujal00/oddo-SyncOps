@@ -154,4 +154,9 @@ export class ManufacturingRepository {
       },
     });
   }
+
+  async softDelete(id: string) {
+    await this.findById(id);
+    return prisma.manufacturingOrder.update({ where: { id }, data: { deletedAt: new Date() } });
+  }
 }

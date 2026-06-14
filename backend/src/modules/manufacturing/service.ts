@@ -174,6 +174,11 @@ export class ManufacturingService {
     return toWorkCenterDto(await this.repository.updateWorkCenter(id, dto));
   }
 
+  async remove(id: string): Promise<{ id: string }> {
+    await this.repository.softDelete(id);
+    return { id };
+  }
+
   private async componentWarnings(bom: ActiveBillOfMaterial, moQuantity: number) {
     const warnings: string[] = [];
     await Promise.all(

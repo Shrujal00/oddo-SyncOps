@@ -95,4 +95,12 @@ export class ProductsRepository {
       },
     });
   }
+
+  async softDelete(id: string) {
+    await this.getById(id);
+    return prisma.product.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
 }

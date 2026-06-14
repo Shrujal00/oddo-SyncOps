@@ -106,4 +106,9 @@ export class SalesRepository {
       data: { deliveredQty: { increment: qty } },
     });
   }
+
+  async softDelete(id: string) {
+    await this.findById(id);
+    return prisma.salesOrder.update({ where: { id }, data: { deletedAt: new Date() } });
+  }
 }

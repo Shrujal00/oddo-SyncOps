@@ -87,6 +87,7 @@ export default function SalesPage() {
   const { accessToken, user } = useAppStore();
   const qc = useQueryClient();
   const canWrite = user?.role === "ADMIN" || user?.role === "BUSINESS_OWNER" || user?.role === "SALES_USER";
+  const isAdmin = user?.role === "ADMIN";
 
   const [showCreate, setShowCreate] = useState(false);
   const [deliveryOrder, setDeliveryOrder] = useState<SalesOrder | null>(null);
@@ -172,6 +173,12 @@ export default function SalesPage() {
       qc.invalidateQueries({ queryKey: ["sales-orders"] });
       qc.invalidateQueries({ queryKey: ["products"] });
     },
+    onError: (e: Error) => setActionError(e.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiFetch(`/sales/${id}`, { method: "DELETE", token: accessToken ?? undefined }),
+    onSuccess: () => { setActionError(""); qc.invalidateQueries({ queryKey: ["sales-orders"] }); qc.invalidateQueries({ queryKey: ["products"] }); },
     onError: (e: Error) => setActionError(e.message),
   });
 
@@ -305,6 +312,11 @@ export default function SalesPage() {
                           {["DRAFT", "CONFIRMED"].includes(order.status) && (
                             <IconButton label="Cancel" onClick={() => cancelMutation.mutate(order.id)} disabled={!user?.id || cancelMutation.isPending}>
                               <X size={15} />
+                            </IconButton>
+                          )}
+                          {isAdmin && (
+                            <IconButton label="Delete" onClick={() => { if (window.confirm(`Delete ${order.orderNumber}?`)) deleteMutation.mutate(order.id); }} disabled={deleteMutation.isPending}>
+                              <Trash2 size={15} />
                             </IconButton>
                           )}
                         </div>

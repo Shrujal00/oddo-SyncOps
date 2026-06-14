@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, Mail, Phone } from "lucide-react";
+import { Building2, Mail, Phone, Trash2 } from "lucide-react";
 import { apiFetch } from "../../../lib/api";
 import { useAppStore } from "../../../store/app-store";
 
@@ -27,6 +27,7 @@ export default function VendorsPage() {
   const { accessToken, user } = useAppStore();
   const queryClient = useQueryClient();
   const canWrite = user?.role === "ADMIN" || user?.role === "PURCHASE_USER" || user?.role === "BUSINESS_OWNER";
+  const isAdmin = user?.role === "ADMIN";
 
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<"create" | Vendor | null>(null);
@@ -79,6 +80,12 @@ export default function VendorsPage() {
       queryClient.invalidateQueries({ queryKey: ["vendors"] });
       closeModal();
     },
+    onError: (err: Error) => setError(err.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiFetch(`/vendors/${id}`, { method: "DELETE", token: accessToken ?? undefined }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vendors"] }),
     onError: (err: Error) => setError(err.message),
   });
 
@@ -208,11 +215,23 @@ export default function VendorsPage() {
                       ) : "-"}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {canWrite && (
-                        <button onClick={() => openEdit(vendor)} className="text-xs text-accent hover:underline">
-                          Edit
-                        </button>
-                      )}
+                      <div className="flex items-center justify-end gap-2">
+                        {canWrite && (
+                          <button onClick={() => openEdit(vendor)} className="text-xs text-accent hover:underline">
+                            Edit
+                          </button>
+                        )}
+                        {isAdmin && (
+                          <button
+                            onClick={() => { if (window.confirm(`Delete "${vendor.name}"?`)) deleteMutation.mutate(vendor.id); }}
+                            disabled={deleteMutation.isPending}
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-text-3 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                            title="Delete vendor"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

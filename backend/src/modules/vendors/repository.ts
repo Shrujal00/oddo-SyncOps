@@ -36,4 +36,9 @@ export class VendorsRepository {
       },
     });
   }
+
+  async softDelete(id: string) {
+    await this.getById(id);
+    return prisma.vendor.update({ where: { id }, data: { deletedAt: new Date() } });
+  }
 }

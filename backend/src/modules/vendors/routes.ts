@@ -26,3 +26,4 @@ vendorsRoutes.patch(
   validateBody(updateVendorSchema),
   asyncHandler(controller.update),
 );
+vendorsRoutes.delete("/:id", requireRoles("ADMIN"), asyncHandler(controller.remove));

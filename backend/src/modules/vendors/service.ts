@@ -30,4 +30,9 @@ export class VendorsService {
   async update(id: string, dto: UpdateVendorDto): Promise<VendorResponseDto> {
     return toDto(await this.repository.update(id, dto));
   }
+
+  async remove(id: string): Promise<{ id: string }> {
+    await this.repository.softDelete(id);
+    return { id };
+  }
 }

@@ -25,3 +25,4 @@ purchasesRoutes.patch("/:id", validateBody(updatePurchaseOrderSchema), asyncHand
 purchasesRoutes.post("/:id/confirm", validateBody(confirmPurchaseOrderSchema), asyncHandler(controller.confirm));
 purchasesRoutes.post("/:id/receive", validateBody(receivePurchaseOrderSchema), asyncHandler(controller.receive));
 purchasesRoutes.post("/:id/cancel", validateBody(cancelPurchaseOrderSchema), asyncHandler(controller.cancel));
+purchasesRoutes.delete("/:id", requireRoles("ADMIN"), asyncHandler(controller.remove));

@@ -75,6 +75,12 @@ export default function LoginPage() {
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
+          <button
+            type="button"
+            className="w-full rounded-lg border border-border bg-elevated py-2.5 text-sm font-medium text-text-1 transition-colors hover:bg-surface"
+          >
+            Sign up
+          </button>
         </form>
 
         <p className="text-center text-xs text-text-3 mt-6">

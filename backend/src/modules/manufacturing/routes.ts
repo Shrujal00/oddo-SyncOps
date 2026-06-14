@@ -30,3 +30,4 @@ manufacturingRoutes.post("/:id/confirm", validateBody(confirmManufacturingSchema
 manufacturingRoutes.post("/:id/start", validateBody(startManufacturingSchema), asyncHandler(controller.start));
 manufacturingRoutes.post("/:id/complete", validateBody(completeManufacturingSchema), asyncHandler(controller.complete));
 manufacturingRoutes.patch("/:moId/work-orders/:woId", validateBody(updateWorkOrderSchema), asyncHandler(controller.updateWorkOrder));
+manufacturingRoutes.delete("/:id", requireRoles("ADMIN"), asyncHandler(controller.remove));

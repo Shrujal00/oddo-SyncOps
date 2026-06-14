@@ -26,3 +26,8 @@ productsRoutes.patch(
   validateBody(updateProductSchema),
   asyncHandler(controller.update),
 );
+productsRoutes.delete(
+  "/:id",
+  requireRoles("ADMIN", "BUSINESS_OWNER"),
+  asyncHandler(controller.remove),
+);
