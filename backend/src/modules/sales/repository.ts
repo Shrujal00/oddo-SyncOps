@@ -31,12 +31,13 @@ function itemCreateManyData(items: CreateSalesOrderDto["items"]) {
 }
 
 export class SalesRepository {
-  async listSalesOrders() {
-    return prisma.salesOrder.findMany({
-      where: { deletedAt: null },
-      include: salesOrderInclude,
-      orderBy: { orderDate: "desc" },
-    });
+  async listSalesOrders(page = 1, limit = 20, status?: SalesOrderStatus) {
+    const where = { deletedAt: null, ...(status && { status }) };
+    const [salesOrders, total] = await Promise.all([
+      prisma.salesOrder.findMany({ where, include: salesOrderInclude, orderBy: { orderDate: "desc" }, skip: (page - 1) * limit, take: limit }),
+      prisma.salesOrder.count({ where }),
+    ]);
+    return { salesOrders, total };
   }
 
   async findById(id: string) {

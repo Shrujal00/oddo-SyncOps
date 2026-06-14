@@ -40,13 +40,11 @@ export class ProductsService {
   ) {}
 
   async list(filters: ListProductsFilters & { lowStockOnly?: boolean } = {}): Promise<ProductListResponseDto> {
-    const { lowStockOnly, ...repoFilters } = filters;
-    const products = await this.repository.listProducts(repoFilters);
+    const { lowStockOnly, page = 1, limit = 20, ...repoFilters } = filters;
+    const { products, total } = await this.repository.listProducts({ ...repoFilters, page, limit });
     const withStock = await Promise.all(products.map((p) => attachStock(p, this.inventoryRepo)));
-    const result = lowStockOnly
-      ? withStock.filter((p) => p.freeToUseQty < p.reorderPoint)
-      : withStock;
-    return { products: result, total: result.length };
+    const result = lowStockOnly ? withStock.filter((p) => p.freeToUseQty < p.reorderPoint) : withStock;
+    return { products: result, total, page, limit };
   }
 
   async getOne(id: string): Promise<ProductResponseDto> {

@@ -14,9 +14,9 @@ function toDto(c: { id: string; name: string; email: string | null; phone: strin
 export class CustomersService {
   constructor(private readonly repository = new CustomersRepository()) {}
 
-  async list(name?: string): Promise<CustomerListResponseDto> {
-    const customers = await this.repository.list(name);
-    return { customers: customers.map(toDto), total: customers.length };
+  async list(name?: string, page = 1, limit = 20): Promise<CustomerListResponseDto> {
+    const { customers, total } = await this.repository.list(name, page, limit);
+    return { customers: customers.map(toDto), total, page, limit };
   }
 
   async getOne(id: string): Promise<CustomerResponseDto> {

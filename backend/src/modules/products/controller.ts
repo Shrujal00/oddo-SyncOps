@@ -5,12 +5,14 @@ export class ProductsController {
   constructor(private readonly service = new ProductsService()) {}
 
   list = async (request: Request, response: Response) => {
-    const { sku, name, lowStockOnly, productType } = request.query as Record<string, string>;
+    const { sku, name, lowStockOnly, productType, page, limit } = request.query as Record<string, string>;
     const result = await this.service.list({
       sku,
       name,
       productType: productType === "RAW_MATERIAL" || productType === "FINISHED_PRODUCT" ? productType : undefined,
       lowStockOnly: lowStockOnly === "true",
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
     });
     response.json({ data: result });
   };

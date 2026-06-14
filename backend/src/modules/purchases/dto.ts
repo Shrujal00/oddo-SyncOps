@@ -61,4 +61,7 @@ export interface PurchaseOrderResponseDto {
 
 export interface PurchaseOrderListResponseDto {
   purchaseOrders: PurchaseOrderResponseDto[];
+  total: number;
+  page: number;
+  limit: number;
 }

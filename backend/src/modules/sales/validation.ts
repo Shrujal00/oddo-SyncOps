@@ -27,7 +27,7 @@ export const deliverSalesOrderSchema = z.object({
       salesOrderItemId: z.string().uuid(),
       quantity: z.number().int().positive(),
     }),
-  ),
+  ).min(1, "At least one item must be delivered"),
 });
 
 export const cancelSalesOrderSchema = z.object({

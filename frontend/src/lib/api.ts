@@ -62,7 +62,13 @@ const demoCustomers = [
 ];
 
 const demoVendors = [
-  { id: "55555555-5555-5555-5555-555555555555", name: "Volt Components", email: "ops@volt.example", phone: "+91 91111 11111" },
+  {
+    id: "55555555-5555-5555-5555-555555555555",
+    name: "Volt Components",
+    email: "ops@volt.example",
+    phone: "+91 91111 11111",
+    products: [demoProducts[1], demoProducts[2]],
+  },
 ];
 
 const demoSalesOrders = [
@@ -130,7 +136,12 @@ const demoBoms = [
 ];
 
 function demoPayload(path: string, method = "GET") {
-  const clean = path.split("?")[0];
+  const [clean, query = ""] = path.split("?");
+  const searchParams = new URLSearchParams(query);
+  const page = Number(searchParams.get("page") ?? "1");
+  const limit = Number(searchParams.get("limit") ?? "20");
+  const paginate = <T>(items: T[]) => items.slice((page - 1) * limit, page * limit);
+
   if (method !== "GET") return { data: { id: "demo-ok", ok: true } };
   if (clean === "/dashboard" || clean === "/dashboard/summary") {
     return {
@@ -142,11 +153,11 @@ function demoPayload(path: string, method = "GET") {
       },
     };
   }
-  if (clean === "/products") return { data: { products: demoProducts, total: demoProducts.length } };
-  if (clean === "/customers") return { data: { customers: demoCustomers, total: demoCustomers.length } };
-  if (clean === "/vendors") return { data: { vendors: demoVendors, total: demoVendors.length } };
-  if (clean === "/sales") return { data: { salesOrders: demoSalesOrders } };
-  if (clean === "/purchases") return { data: { purchaseOrders: demoPurchaseOrders } };
+  if (clean === "/products") return { data: { products: paginate(demoProducts), total: demoProducts.length, page, limit } };
+  if (clean === "/customers") return { data: { customers: paginate(demoCustomers), total: demoCustomers.length, page, limit } };
+  if (clean === "/vendors") return { data: { vendors: paginate(demoVendors), total: demoVendors.length, page, limit } };
+  if (clean === "/sales") return { data: { salesOrders: paginate(demoSalesOrders), total: demoSalesOrders.length, page, limit } };
+  if (clean === "/purchases") return { data: { purchaseOrders: paginate(demoPurchaseOrders), total: demoPurchaseOrders.length, page, limit } };
   if (clean === "/manufacturing") return { data: demoManufacturingOrders };
   if (clean === "/manufacturing/work-centers") return { data: demoWorkCenters };
   if (clean === "/bom") return { data: demoBoms };

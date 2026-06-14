@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 import { useAppStore } from "../../../store/app-store";
 import { apiFetch } from "../../../lib/api";
+import { Pagination } from "../../../components/Pagination";
 
 interface Product {
   id: string;
@@ -28,7 +29,7 @@ interface Product {
 type ProductType = "RAW_MATERIAL" | "FINISHED_PRODUCT";
 
 interface ProductsResponse {
-  data: { products: Product[]; total: number };
+  data: { products: Product[]; total: number; page: number; limit: number };
 }
 
 const EMPTY_FORM = {
@@ -89,6 +90,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [productTypeFilter, setProductTypeFilter] = useState<"ALL" | ProductType>("ALL");
+  const [page, setPage] = useState(1);
   const [modal, setModal] = useState<null | "create" | Product>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
@@ -97,9 +99,15 @@ export default function ProductsPage() {
   if (search) params.set("name", search);
   if (lowStockOnly) params.set("lowStockOnly", "true");
   if (productTypeFilter !== "ALL") params.set("productType", productTypeFilter);
+  params.set("page", String(page));
+  params.set("limit", "20");
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, lowStockOnly, productTypeFilter]);
 
   const { data, isLoading } = useQuery<ProductsResponse["data"]>({
-    queryKey: ["products", search, lowStockOnly, productTypeFilter],
+    queryKey: ["products", search, lowStockOnly, productTypeFilter, page],
     queryFn: async () => {
       const res = await apiFetch<ProductsResponse>(`/products?${params}`, { token: accessToken ?? undefined });
       return res.data;
@@ -324,6 +332,8 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+
+      {data && <Pagination page={data.page} limit={data.limit} total={data.total} onChange={setPage} />}
 
       {/* Modal */}
       {modal !== null && (

@@ -46,9 +46,9 @@ export class PurchasesService {
     private readonly auditRepo = new AuditRepository(),
   ) {}
 
-  async list(): Promise<PurchaseOrderListResponseDto> {
-    const purchaseOrders = await this.repository.listPurchaseOrders();
-    return { purchaseOrders: purchaseOrders.map(toDto) };
+  async list(page = 1, limit = 20, status?: PurchaseOrderStatus): Promise<PurchaseOrderListResponseDto> {
+    const { purchaseOrders, total } = await this.repository.listPurchaseOrders(page, limit, status);
+    return { purchaseOrders: purchaseOrders.map(toDto), total, page, limit };
   }
 
   async create(dto: CreatePurchaseOrderDto): Promise<PurchaseOrderResponseDto> {

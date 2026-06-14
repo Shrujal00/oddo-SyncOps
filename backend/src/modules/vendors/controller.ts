@@ -5,8 +5,12 @@ export class VendorsController {
   constructor(private readonly service = new VendorsService()) {}
 
   list = async (request: Request, response: Response) => {
-    const { name } = request.query as Record<string, string>;
-    const result = await this.service.list(name);
+    const { name, page, limit } = request.query as Record<string, string>;
+    const result = await this.service.list(
+      name,
+      page ? parseInt(page, 10) : undefined,
+      limit ? parseInt(limit, 10) : undefined,
+    );
     response.json({ data: result });
   };
 

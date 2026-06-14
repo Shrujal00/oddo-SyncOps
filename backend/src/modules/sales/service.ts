@@ -48,9 +48,9 @@ export class SalesService {
     private readonly procurementService = new ProcurementService(),
   ) {}
 
-  async list(): Promise<SalesOrderListResponseDto> {
-    const salesOrders = await this.repository.listSalesOrders();
-    return { salesOrders: salesOrders.map(toDto) };
+  async list(page = 1, limit = 20, status?: SalesOrderStatus): Promise<SalesOrderListResponseDto> {
+    const { salesOrders, total } = await this.repository.listSalesOrders(page, limit, status);
+    return { salesOrders: salesOrders.map(toDto), total, page, limit };
   }
 
   async create(dto: CreateSalesOrderDto): Promise<SalesOrderResponseDto> {
@@ -69,16 +69,35 @@ export class SalesService {
     const order = await this.repository.findById(id);
     if (order.status !== "DRAFT") throw new HttpError(400, "Only draft sales orders can be confirmed");
 
+    // Snapshot stock BEFORE confirming so this order's items aren't counted as reserved yet.
+    // Aggregate by productId first so duplicate line items don't trigger separate procurement calls.
+    const productTotals = new Map<string, { item: (typeof order.items)[number]; totalQty: number }>();
+    for (const item of order.items) {
+      const existing = productTotals.get(item.productId);
+      if (existing) {
+        existing.totalQty += item.quantity;
+      } else {
+        productTotals.set(item.productId, { item, totalQty: item.quantity });
+      }
+    }
+
+    const itemStocks = await Promise.all(
+      [...productTotals.values()].map(async ({ item, totalQty }) => ({
+        item,
+        totalQty,
+        freeToUseQty: (await this.inventoryRepo.getStockSummary(item.productId)).freeToUseQty,
+      })),
+    );
+
     const confirmed = await this.repository.updateStatus(id, "CONFIRMED");
     await Promise.all(
-      confirmed.items.map(async (item) => {
-        const stock = await this.inventoryRepo.getStockSummary(item.productId);
-        if (stock.freeToUseQty < item.quantity && item.product.procureOnDemand) {
+      itemStocks.map(async ({ item, totalQty, freeToUseQty }) => {
+        if (freeToUseQty < totalQty && item.product.procureOnDemand) {
           await this.procurementService.triggerProcurement({
             salesOrderId: id,
             productId: item.productId,
-            requiredQty: item.quantity,
-            availableQty: stock.freeToUseQty,
+            requiredQty: totalQty,
+            availableQty: freeToUseQty,
           }, dto.confirmedBy);
         }
       }),
@@ -109,6 +128,11 @@ export class SalesService {
       if (!item) throw new HttpError(400, "Sales order item not found");
       const remaining = item.quantity - item.deliveredQty;
       if (quantity > remaining) throw new HttpError(400, "Delivered quantity exceeds remaining quantity");
+
+      const stock = await this.inventoryRepo.getStockSummary(item.productId);
+      if (stock.onHandQty < quantity) {
+        throw new HttpError(400, `Insufficient stock for ${item.product?.name ?? item.productId}: ${stock.onHandQty} on hand, ${quantity} requested`);
+      }
 
       await this.inventoryRepo.recordMovement({
         productId: item.productId,

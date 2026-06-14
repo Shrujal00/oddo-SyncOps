@@ -6,20 +6,24 @@ export interface ListProductsFilters {
   sku?: string;
   name?: string;
   productType?: "RAW_MATERIAL" | "FINISHED_PRODUCT";
+  page?: number;
+  limit?: number;
 }
 
 export class ProductsRepository {
   async listProducts(filters: ListProductsFilters = {}) {
-    const { sku, name, productType } = filters;
-    return prisma.product.findMany({
-      where: {
-        deletedAt: null,
-        ...(sku && { sku: { contains: sku, mode: "insensitive" as const } }),
-        ...(name && { name: { contains: name, mode: "insensitive" as const } }),
-        ...(productType && { productType }),
-      },
-      orderBy: { name: "asc" },
-    });
+    const { sku, name, productType, page = 1, limit = 20 } = filters;
+    const where = {
+      deletedAt: null,
+      ...(sku && { sku: { contains: sku, mode: "insensitive" as const } }),
+      ...(name && { name: { contains: name, mode: "insensitive" as const } }),
+      ...(productType && { productType }),
+    };
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({ where, orderBy: { name: "asc" }, skip: (page - 1) * limit, take: limit }),
+      prisma.product.count({ where }),
+    ]);
+    return { products, total };
   }
 
   async getById(id: string) {

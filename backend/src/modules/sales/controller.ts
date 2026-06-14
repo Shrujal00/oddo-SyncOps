@@ -4,8 +4,13 @@ import { SalesService } from "./service.js";
 export class SalesController {
   constructor(private readonly service = new SalesService()) {}
 
-  list = async (_request: Request, response: Response) => {
-    const result = await this.service.list();
+  list = async (request: Request, response: Response) => {
+    const { page, limit, status } = request.query as Record<string, string>;
+    const result = await this.service.list(
+      page ? parseInt(page, 10) : undefined,
+      limit ? parseInt(limit, 10) : undefined,
+      status as any,
+    );
     response.json({ data: result });
   };
 

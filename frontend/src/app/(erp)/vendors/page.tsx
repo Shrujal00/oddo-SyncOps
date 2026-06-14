@@ -1,26 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, Mail, Phone, Trash2 } from "lucide-react";
+import { Building2, Mail, Package, Phone, Trash2 } from "lucide-react";
 import { apiFetch } from "../../../lib/api";
+import { Pagination } from "../../../components/Pagination";
 import { useAppStore } from "../../../store/app-store";
+
+interface VendorProduct {
+  id: string;
+  name: string;
+  sku: string;
+}
 
 interface Vendor {
   id: string;
   name: string;
   email?: string;
   phone?: string;
+  products: VendorProduct[];
+}
+
+interface Product {
+  id: string;
+  name: string;
+  sku: string;
 }
 
 interface VendorsResponse {
-  data: { vendors: Vendor[]; total: number };
+  data: { vendors: Vendor[]; total: number; page: number; limit: number };
+}
+
+interface ProductsResponse {
+  data: { products: Product[]; total: number };
 }
 
 const EMPTY_FORM = {
   name: "",
   email: "",
   phone: "",
+  productIds: [] as string[],
 };
 
 export default function VendorsPage() {
@@ -30,15 +49,22 @@ export default function VendorsPage() {
   const isAdmin = user?.role === "ADMIN";
 
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [modal, setModal] = useState<"create" | Vendor | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
 
   const params = new URLSearchParams();
   if (search) params.set("name", search);
+  params.set("page", String(page));
+  params.set("limit", "20");
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   const { data, isLoading } = useQuery<VendorsResponse["data"]>({
-    queryKey: ["vendors", search],
+    queryKey: ["vendors", search, page],
     queryFn: async () => {
       const response = await apiFetch<VendorsResponse>(`/vendors?${params}`, {
         token: accessToken ?? undefined,
@@ -46,6 +72,18 @@ export default function VendorsPage() {
       return response.data;
     },
   });
+
+  const { data: productsData } = useQuery<Product[]>({
+    queryKey: ["products-simple"],
+    queryFn: async () => {
+      const response = await apiFetch<ProductsResponse>("/products?limit=1000", {
+        token: accessToken ?? undefined,
+      });
+      return response.data.products;
+    },
+  });
+
+  const allProducts = productsData ?? [];
 
   const createMutation = useMutation({
     mutationFn: (body: typeof EMPTY_FORM) =>
@@ -55,11 +93,14 @@ export default function VendorsPage() {
           name: body.name,
           email: body.email || undefined,
           phone: body.phone || undefined,
+          productIds: body.productIds,
         }),
         token: accessToken ?? undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-simple"] });
       closeModal();
     },
     onError: (err: Error) => setError(err.message),
@@ -73,11 +114,14 @@ export default function VendorsPage() {
           name: body.name,
           email: body.email || undefined,
           phone: body.phone || undefined,
+          productIds: body.productIds,
         }),
         token: accessToken ?? undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-simple"] });
       closeModal();
     },
     onError: (err: Error) => setError(err.message),
@@ -100,6 +144,7 @@ export default function VendorsPage() {
       name: vendor.name,
       email: vendor.email ?? "",
       phone: vendor.phone ?? "",
+      productIds: vendor.products.map((p) => p.id),
     });
     setError("");
     setModal(vendor);
@@ -108,6 +153,15 @@ export default function VendorsPage() {
   function closeModal() {
     setModal(null);
     setError("");
+  }
+
+  function toggleProduct(productId: string) {
+    setForm((f) => ({
+      ...f,
+      productIds: f.productIds.includes(productId)
+        ? f.productIds.filter((id) => id !== productId)
+        : [...f.productIds, productId],
+    }));
   }
 
   function submit() {
@@ -177,7 +231,7 @@ export default function VendorsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-surface">
-                  {["Vendor", "Email", "Phone", ""].map((heading) => (
+                  {["Vendor", "Email", "Phone", "Products", ""].map((heading) => (
                     <th key={heading} className="whitespace-nowrap px-4 py-2.5 text-left text-xs font-medium text-text-3">
                       {heading}
                     </th>
@@ -214,6 +268,20 @@ export default function VendorsPage() {
                         </span>
                       ) : "-"}
                     </td>
+                    <td className="px-4 py-3">
+                      {vendor.products.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {vendor.products.map((p) => (
+                            <span key={p.id} className="inline-flex items-center gap-1 rounded-md bg-accent-light px-2 py-0.5 text-[11px] font-medium text-accent">
+                              <Package size={10} />
+                              {p.sku}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-text-3">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {canWrite && (
@@ -241,9 +309,11 @@ export default function VendorsPage() {
         )}
       </div>
 
+      {data && <Pagination page={data.page} limit={data.limit} total={data.total} onChange={setPage} />}
+
       {modal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="mx-4 flex max-h-[90vh] w-full max-w-md flex-col rounded-2xl border border-border bg-bg shadow-xl">
+          <div className="mx-4 flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl border border-border bg-bg shadow-xl">
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <h2 className="text-base font-semibold text-text-1">
                 {modal === "create" ? "New Vendor" : `Edit ${(modal as Vendor).name}`}
@@ -258,6 +328,34 @@ export default function VendorsPage() {
               <VendorField label="Name *" value={form.name} onChange={(value) => setForm((f) => ({ ...f, name: value }))} />
               <VendorField label="Email" type="email" value={form.email} onChange={(value) => setForm((f) => ({ ...f, email: value }))} />
               <VendorField label="Phone" value={form.phone} onChange={(value) => setForm((f) => ({ ...f, phone: value }))} />
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-text-2">Products Supplied</label>
+                {allProducts.length === 0 ? (
+                  <p className="text-xs text-text-3">No products available</p>
+                ) : (
+                  <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-surface">
+                    {allProducts.map((product) => (
+                      <label
+                        key={product.id}
+                        className="flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2 last:border-0 hover:bg-bg"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={form.productIds.includes(product.id)}
+                          onChange={() => toggleProduct(product.id)}
+                          className="accent-[#714B67]"
+                        />
+                        <span className="flex-1 text-sm text-text-1">{product.name}</span>
+                        <span className="font-mono text-[11px] text-text-3">{product.sku}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {form.productIds.length > 0 && (
+                  <p className="text-[11px] text-text-3">{form.productIds.length} product{form.productIds.length !== 1 ? "s" : ""} selected</p>
+                )}
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 border-t border-border px-5 py-4">

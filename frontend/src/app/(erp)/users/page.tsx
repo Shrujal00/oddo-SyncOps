@@ -71,6 +71,7 @@ export default function UsersPage() {
 
   const [search, setSearch] = useState("");
   const [selectedRole, setSelectedRole] = useState<RoleName | "ALL">("ALL");
+  const [panelRole, setPanelRole] = useState<RoleName>("ADMIN");
   const [modal, setModal] = useState<"create" | UserRecord | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
@@ -87,7 +88,13 @@ export default function UsersPage() {
     queryFn: async () => (await apiFetch<RolesResponse>("/users/roles", { token: accessToken ?? undefined })).data,
   });
 
-  const selectedRoleRecord = roles.find((role) => role.name === (selectedRole === "ALL" ? form.roleName : selectedRole)) ?? roles[0];
+  const selectedRoleRecord = roles.find((role) => role.name === panelRole) ?? roles[0];
+
+  useEffect(() => {
+    if (roles.length > 0 && !roles.find((r) => r.name === panelRole)) {
+      setPanelRole(roles[0].name);
+    }
+  }, [roles]);
 
   useEffect(() => {
     if (!selectedRoleRecord) return;
@@ -339,8 +346,8 @@ export default function UsersPage() {
           </div>
 
           <select
-            value={selectedRoleRecord?.name ?? "ADMIN"}
-            onChange={(event) => setSelectedRole(event.target.value as RoleName)}
+            value={panelRole}
+            onChange={(event) => setPanelRole(event.target.value as RoleName)}
             className="mb-3 w-full rounded-lg border border-border bg-bg px-3 py-1.5 text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-accent"
           >
             {roles.map((role) => <option key={role.name} value={role.name}>{role.label}</option>)}

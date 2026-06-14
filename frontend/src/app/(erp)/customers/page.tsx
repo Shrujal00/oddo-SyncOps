@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Mail, Phone, Trash2, UserRound } from "lucide-react";
 import { apiFetch } from "../../../lib/api";
+import { Pagination } from "../../../components/Pagination";
 import { useAppStore } from "../../../store/app-store";
 
 interface Customer {
@@ -14,7 +15,7 @@ interface Customer {
 }
 
 interface CustomersResponse {
-  data: { customers: Customer[]; total: number };
+  data: { customers: Customer[]; total: number; page: number; limit: number };
 }
 
 const EMPTY_FORM = {
@@ -30,15 +31,22 @@ export default function CustomersPage() {
   const isAdmin = user?.role === "ADMIN";
 
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [modal, setModal] = useState<"create" | Customer | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
 
   const params = new URLSearchParams();
   if (search) params.set("name", search);
+  params.set("page", String(page));
+  params.set("limit", "20");
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   const { data, isLoading } = useQuery<CustomersResponse["data"]>({
-    queryKey: ["customers", search],
+    queryKey: ["customers", search, page],
     queryFn: async () => {
       const response = await apiFetch<CustomersResponse>(`/customers?${params}`, {
         token: accessToken ?? undefined,
@@ -237,6 +245,8 @@ export default function CustomersPage() {
           </div>
         )}
       </div>
+
+      {data && <Pagination page={data.page} limit={data.limit} total={data.total} onChange={setPage} />}
 
       {modal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">

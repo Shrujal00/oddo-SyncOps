@@ -61,4 +61,7 @@ export interface SalesOrderResponseDto {
 
 export interface SalesOrderListResponseDto {
   salesOrders: SalesOrderResponseDto[];
+  total: number;
+  page: number;
+  limit: number;
 }

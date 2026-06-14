@@ -4,8 +4,13 @@ import { PurchasesService } from "./service.js";
 export class PurchasesController {
   constructor(private readonly service = new PurchasesService()) {}
 
-  list = async (_request: Request, response: Response) => {
-    const result = await this.service.list();
+  list = async (request: Request, response: Response) => {
+    const { page, limit, status } = request.query as Record<string, string>;
+    const result = await this.service.list(
+      page ? parseInt(page, 10) : undefined,
+      limit ? parseInt(limit, 10) : undefined,
+      status as any,
+    );
     response.json({ data: result });
   };
 

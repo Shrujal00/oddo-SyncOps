@@ -79,7 +79,7 @@ export class ManufacturingService {
     const warnings = await this.componentWarnings(bom, order.quantity);
     const confirmed = await this.repository.updateStatus(id, "CONFIRMED");
     await this.auditRepo.record({
-      eventType: "MANUFACTURING_COMPLETED",
+      eventType: "MANUFACTURING_CONFIRMED",
       entityType: "ManufacturingOrder",
       entityId: id,
       summary: "Confirmed",
@@ -95,7 +95,7 @@ export class ManufacturingService {
     await this.repository.releaseWorkOrders(id);
     const started = await this.repository.updateStatus(id, "IN_PROGRESS");
     await this.auditRepo.record({
-      eventType: "MANUFACTURING_COMPLETED",
+      eventType: "MANUFACTURING_STARTED",
       entityType: "ManufacturingOrder",
       entityId: id,
       summary: "Started",
@@ -108,13 +108,28 @@ export class ManufacturingService {
   async complete(id: string, dto: CompleteManufacturingDto): Promise<ManufacturingOrderResponseDto> {
     const order = await this.repository.findById(id);
     if (order.status !== "IN_PROGRESS") throw new HttpError(400, "Only in-progress manufacturing orders can be completed");
+    if (dto.producedQuantity > order.quantity) {
+      throw new HttpError(400, `Produced quantity (${dto.producedQuantity}) cannot exceed order quantity (${order.quantity})`);
+    }
     const bom = await this.repository.findActiveBomForProduct(order.productId);
 
+    const consumptions: Array<{ productId: string; quantity: number }> = [];
     for (const component of bom.items) {
       const scrapMultiplier = 1 + toNum(component.scrapPercentage) / 100;
       const quantity = Math.ceil(component.quantity * order.quantity * scrapMultiplier);
+      const stock = await this.inventoryRepo.getStockSummary(component.productId);
+      if (stock.onHandQty < quantity) {
+        throw new HttpError(
+          400,
+          `Insufficient raw material ${component.product.sku}: ${stock.onHandQty} on hand, ${quantity} required`,
+        );
+      }
+      consumptions.push({ productId: component.productId, quantity });
+    }
+
+    for (const { productId, quantity } of consumptions) {
       await this.inventoryRepo.recordMovement({
-        productId: component.productId,
+        productId,
         movementType: "CONSUMPTION",
         quantity,
         referenceType: "ManufacturingOrder",

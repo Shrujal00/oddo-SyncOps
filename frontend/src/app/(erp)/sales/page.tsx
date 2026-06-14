@@ -3,11 +3,13 @@
 import type { ReactNode } from "react";
 import { Check, Plus, Trash2, Truck, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../../../lib/api";
+import { Pagination } from "../../../components/Pagination";
 import { useAppStore } from "../../../store/app-store";
 
 type SalesStatus = "DRAFT" | "CONFIRMED" | "PARTIALLY_DELIVERED" | "DELIVERED" | "CANCELLED";
+type SalesStatusFilter = "ALL" | SalesStatus;
 
 interface Customer {
   id: string;
@@ -44,7 +46,7 @@ interface SalesOrder {
 }
 
 interface SalesResponse {
-  data: { salesOrders: SalesOrder[] };
+  data: { salesOrders: SalesOrder[]; total: number; page: number; limit: number };
 }
 
 interface CustomersResponse {
@@ -69,6 +71,15 @@ const STATUS_CLASSES: Record<SalesStatus, string> = {
   CANCELLED: "bg-red-100 text-red-700",
 };
 
+const STATUS_OPTIONS: { value: SalesStatusFilter; label: string }[] = [
+  { value: "ALL", label: "All statuses" },
+  { value: "DRAFT", label: "Draft" },
+  { value: "CONFIRMED", label: "Confirmed" },
+  { value: "PARTIALLY_DELIVERED", label: "Partially delivered" },
+  { value: "DELIVERED", label: "Delivered" },
+  { value: "CANCELLED", label: "Cancelled" },
+];
+
 const EMPTY_LINE: LineForm = { productId: "", quantity: 1, unitPrice: 0 };
 
 function todayInputValue() {
@@ -90,6 +101,8 @@ export default function SalesPage() {
   const isAdmin = user?.role === "ADMIN";
 
   const [showCreate, setShowCreate] = useState(false);
+  const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<SalesStatusFilter>("ALL");
   const [deliveryOrder, setDeliveryOrder] = useState<SalesOrder | null>(null);
   const [createError, setCreateError] = useState("");
   const [actionError, setActionError] = useState("");
@@ -102,10 +115,19 @@ export default function SalesPage() {
   });
   const [deliveryQty, setDeliveryQty] = useState<Record<string, number>>({});
 
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("limit", "20");
+  if (statusFilter !== "ALL") params.set("status", statusFilter);
+
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter]);
+
   const { data, isLoading } = useQuery<SalesResponse["data"]>({
-    queryKey: ["sales-orders"],
+    queryKey: ["sales-orders", statusFilter, page],
     queryFn: async () => {
-      const res = await apiFetch<SalesResponse>("/sales", { token: accessToken ?? undefined });
+      const res = await apiFetch<SalesResponse>(`/sales?${params}`, { token: accessToken ?? undefined });
       return res.data;
     },
   });
@@ -113,7 +135,7 @@ export default function SalesPage() {
   const { data: customersData } = useQuery<CustomersResponse["data"]>({
     queryKey: ["customers"],
     queryFn: async () => {
-      const res = await apiFetch<CustomersResponse>("/customers", { token: accessToken ?? undefined });
+      const res = await apiFetch<CustomersResponse>("/customers?limit=1000", { token: accessToken ?? undefined });
       return res.data;
     },
   });
@@ -121,7 +143,7 @@ export default function SalesPage() {
   const { data: productsData } = useQuery<ProductsResponse["data"]>({
     queryKey: ["products"],
     queryFn: async () => {
-      const res = await apiFetch<ProductsResponse>("/products", { token: accessToken ?? undefined });
+      const res = await apiFetch<ProductsResponse>("/products?limit=1000", { token: accessToken ?? undefined });
       return res.data;
     },
   });
@@ -250,7 +272,7 @@ export default function SalesPage() {
       <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-elevated">
         <div>
           <h1 className="text-lg font-semibold text-text-1">Sales Orders</h1>
-          <p className="text-xs text-text-3 mt-0.5">{orders.length} orders</p>
+          <p className="text-xs text-text-3 mt-0.5">{data?.total ?? 0} orders</p>
         </div>
         {canWrite && (
           <button
@@ -265,6 +287,20 @@ export default function SalesPage() {
       {actionError && (
         <div className="px-6 py-3 bg-red-50 border-b border-red-200 text-xs text-red-700">{actionError}</div>
       )}
+
+      <div className="border-b border-border bg-surface px-6 py-3">
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value as SalesStatusFilter)}
+          className="rounded-lg border border-border bg-bg px-3 py-1.5 text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-accent"
+        >
+          {STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="flex-1 overflow-auto px-6 py-4">
         {isLoading ? (
@@ -329,6 +365,8 @@ export default function SalesPage() {
           </div>
         )}
       </div>
+
+      {data && <Pagination page={data.page} limit={data.limit} total={data.total} onChange={setPage} />}
 
       {showCreate && (
         <Modal title="New Sales Order" onClose={closeCreate}>

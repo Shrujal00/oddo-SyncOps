@@ -17,4 +17,6 @@ export interface CustomerResponseDto {
 export interface CustomerListResponseDto {
   customers: CustomerResponseDto[];
   total: number;
+  page: number;
+  limit: number;
 }

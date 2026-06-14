@@ -3,14 +3,16 @@ import { HttpError } from "../../common/exceptions/http-error.js";
 import type { CreateCustomerDto, UpdateCustomerDto } from "./dto.js";
 
 export class CustomersRepository {
-  async list(name?: string) {
-    return prisma.customer.findMany({
-      where: {
-        deletedAt: null,
-        ...(name && { name: { contains: name, mode: "insensitive" as const } }),
-      },
-      orderBy: { name: "asc" },
-    });
+  async list(name?: string, page = 1, limit = 20) {
+    const where = {
+      deletedAt: null,
+      ...(name && { name: { contains: name, mode: "insensitive" as const } }),
+    };
+    const [customers, total] = await Promise.all([
+      prisma.customer.findMany({ where, orderBy: { name: "asc" }, skip: (page - 1) * limit, take: limit }),
+      prisma.customer.count({ where }),
+    ]);
+    return { customers, total };
   }
 
   async getById(id: string) {

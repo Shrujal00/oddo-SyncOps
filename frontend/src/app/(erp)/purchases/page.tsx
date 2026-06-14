@@ -3,11 +3,13 @@
 import type { ReactNode } from "react";
 import { Check, PackageCheck, Plus, Trash2, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../../../lib/api";
+import { Pagination } from "../../../components/Pagination";
 import { useAppStore } from "../../../store/app-store";
 
 type PurchaseStatus = "DRAFT" | "CONFIRMED" | "PARTIALLY_RECEIVED" | "RECEIVED" | "CANCELLED";
+type PurchaseStatusFilter = "ALL" | PurchaseStatus;
 
 interface Vendor {
   id: string;
@@ -45,7 +47,7 @@ interface PurchaseOrder {
 }
 
 interface PurchasesResponse {
-  data: { purchaseOrders: PurchaseOrder[] };
+  data: { purchaseOrders: PurchaseOrder[]; total: number; page: number; limit: number };
 }
 
 interface VendorsResponse {
@@ -70,6 +72,15 @@ const STATUS_CLASSES: Record<PurchaseStatus, string> = {
   CANCELLED: "bg-red-100 text-red-700",
 };
 
+const STATUS_OPTIONS: { value: PurchaseStatusFilter; label: string }[] = [
+  { value: "ALL", label: "All statuses" },
+  { value: "DRAFT", label: "Draft" },
+  { value: "CONFIRMED", label: "Confirmed" },
+  { value: "PARTIALLY_RECEIVED", label: "Partially received" },
+  { value: "RECEIVED", label: "Received" },
+  { value: "CANCELLED", label: "Cancelled" },
+];
+
 const EMPTY_LINE: LineForm = { productId: "", quantity: 1, unitCost: 0 };
 
 function todayInputValue() {
@@ -91,6 +102,8 @@ export default function PurchasesPage() {
   const isAdmin = user?.role === "ADMIN";
 
   const [showCreate, setShowCreate] = useState(false);
+  const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<PurchaseStatusFilter>("ALL");
   const [receiptOrder, setReceiptOrder] = useState<PurchaseOrder | null>(null);
   const [createError, setCreateError] = useState("");
   const [actionError, setActionError] = useState("");
@@ -103,10 +116,19 @@ export default function PurchasesPage() {
   });
   const [receiptQty, setReceiptQty] = useState<Record<string, number>>({});
 
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("limit", "20");
+  if (statusFilter !== "ALL") params.set("status", statusFilter);
+
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter]);
+
   const { data, isLoading } = useQuery<PurchasesResponse["data"]>({
-    queryKey: ["purchase-orders"],
+    queryKey: ["purchase-orders", statusFilter, page],
     queryFn: async () => {
-      const res = await apiFetch<PurchasesResponse>("/purchases", { token: accessToken ?? undefined });
+      const res = await apiFetch<PurchasesResponse>(`/purchases?${params}`, { token: accessToken ?? undefined });
       return res.data;
     },
   });
@@ -114,7 +136,7 @@ export default function PurchasesPage() {
   const { data: vendorsData } = useQuery<VendorsResponse["data"]>({
     queryKey: ["vendors"],
     queryFn: async () => {
-      const res = await apiFetch<VendorsResponse>("/vendors", { token: accessToken ?? undefined });
+      const res = await apiFetch<VendorsResponse>("/vendors?limit=1000", { token: accessToken ?? undefined });
       return res.data;
     },
   });
@@ -122,7 +144,7 @@ export default function PurchasesPage() {
   const { data: productsData } = useQuery<ProductsResponse["data"]>({
     queryKey: ["products"],
     queryFn: async () => {
-      const res = await apiFetch<ProductsResponse>("/products", { token: accessToken ?? undefined });
+      const res = await apiFetch<ProductsResponse>("/products?limit=1000", { token: accessToken ?? undefined });
       return res.data;
     },
   });
@@ -249,7 +271,7 @@ export default function PurchasesPage() {
       <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-elevated">
         <div>
           <h1 className="text-lg font-semibold text-text-1">Purchase Orders</h1>
-          <p className="text-xs text-text-3 mt-0.5">{orders.length} orders</p>
+          <p className="text-xs text-text-3 mt-0.5">{data?.total ?? 0} orders</p>
         </div>
         {canWrite && (
           <button
@@ -264,6 +286,20 @@ export default function PurchasesPage() {
       {actionError && (
         <div className="px-6 py-3 bg-red-50 border-b border-red-200 text-xs text-red-700">{actionError}</div>
       )}
+
+      <div className="border-b border-border bg-surface px-6 py-3">
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value as PurchaseStatusFilter)}
+          className="rounded-lg border border-border bg-bg px-3 py-1.5 text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-accent"
+        >
+          {STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="flex-1 overflow-auto px-6 py-4">
         {isLoading ? (
@@ -328,6 +364,8 @@ export default function PurchasesPage() {
           </div>
         )}
       </div>
+
+      {data && <Pagination page={data.page} limit={data.limit} total={data.total} onChange={setPage} />}
 
       {showCreate && (
         <Modal title="New Purchase Order" onClose={closeCreate}>

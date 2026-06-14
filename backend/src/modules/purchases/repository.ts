@@ -31,12 +31,13 @@ function itemCreateManyData(items: CreatePurchaseOrderDto["items"]) {
 }
 
 export class PurchasesRepository {
-  async listPurchaseOrders() {
-    return prisma.purchaseOrder.findMany({
-      where: { deletedAt: null },
-      include: purchaseOrderInclude,
-      orderBy: { orderDate: "desc" },
-    });
+  async listPurchaseOrders(page = 1, limit = 20, status?: PurchaseOrderStatus) {
+    const where = { deletedAt: null, ...(status && { status }) };
+    const [purchaseOrders, total] = await Promise.all([
+      prisma.purchaseOrder.findMany({ where, include: purchaseOrderInclude, orderBy: { orderDate: "desc" }, skip: (page - 1) * limit, take: limit }),
+      prisma.purchaseOrder.count({ where }),
+    ]);
+    return { purchaseOrders, total };
   }
 
   async findById(id: string) {

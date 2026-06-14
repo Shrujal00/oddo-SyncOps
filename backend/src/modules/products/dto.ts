@@ -31,4 +31,6 @@ export interface ProductResponseDto extends CreateProductDto {
 export interface ProductListResponseDto {
   products: ProductResponseDto[];
   total: number;
+  page: number;
+  limit: number;
 }

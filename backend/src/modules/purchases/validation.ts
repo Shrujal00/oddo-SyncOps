@@ -29,7 +29,7 @@ export const receivePurchaseOrderSchema = z.object({
       purchaseOrderItemId: z.string().uuid(),
       quantity: z.number().int().positive(),
     }),
-  ),
+  ).min(1, "At least one item must be received"),
 });
 
 export const cancelPurchaseOrderSchema = z.object({
